@@ -1,35 +1,35 @@
-import * as d3 from 'd3'
-import React from 'react';
-import {render} from 'react-dom';
-import AwesomeComponent from './AwesomeComponent.js';
+import * as d3 from 'd3';
+import React, { Component } from 'react';
+import TreeGraph from './TreeGraph';
 
-class App extends React.Component {
-  render () {
+class App extends Component {
+  constructor(props){
+    super(props)
+    this.onResize = this.onResize.bind(this)
+    this.state = { screenWidth: 1000, screenHeight: 500, hover: "none", brushExtent: [0,40] }
+  }
+
+  onResize() {
+    this.setState({ screenWidth: window.innerWidth, screenHeight: window.innerHeight - 120 })
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', this.onResize, false)
+    this.onResize()
+  }
+
+  render() {
     return (
-      <div>
-        <p> Hello React Project</p>
-        <AwesomeComponent />
+      <div className="App">
+        <div className="App-header">
+          <h2>react d3 dashboard</h2>
+        </div>
+        <div>
+        <TreeGraph size={[this.state.screenWidth, this.state.screenHeight]} />
+        </div>
       </div>
-    );
+    )
   }
 }
 
-render(<App/>, document.getElementById('root'));
-
-// Selecting and appending elements
-d3.select('#root')
-  .append('h5')
-  .append('text')
-  .text(`D3 version: ${d3.version}`)
-
-// Loading external data
-d3.csv('/data/sample.csv', (error, dataset) => {
-  dataset.forEach((data) => {
-    console.log(data)
-  })
-})
-
-d3.xml("/data/cherry-flower.svg",
-(xml) => {
-  const flowerSvg = xml.getElementsByTagName("svg")[0];
-});
+export default App

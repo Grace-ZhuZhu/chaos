@@ -2,7 +2,7 @@
   "name": "learn-d3",
   "version": "1.0.0",
   "description": "Basic D3.js project for learning purposes",
-  "main": "src/app.js",
+  "main": "src/index.js",
   "scripts": {
     "start": "./node_modules/.bin/webpack-dev-server --hot --inline --progress",
     "build": "webpack -p --config webpack.config.js --hide-modules"

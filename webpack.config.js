@@ -12,7 +12,7 @@ const paths = {
 
 module.exports = {
   context: paths.src,
-  entry: ['./app.js', './main.scss'],
+  entry: ['./index.js', './main.scss'],
   output: {
     filename: 'app.bundle.js',
     path: paths.dist,
@@ -23,10 +23,7 @@ module.exports = {
       {
         test : /\.jsx?/,
         include : path.src,
-        loader : 'babel-loader',
-        query: {
-          presets: ['es2015', 'react']
-        }
+        loader : 'babel-loader'
       }
     ],
     rules: [
