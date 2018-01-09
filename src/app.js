@@ -22,7 +22,7 @@ class App extends Component {
     return (
       <div className="App">
         <div className="App-header">
-          <h2>react d3 dashboard</h2>
+          <h5>react d3 dashboard</h5>
         </div>
         <div>
         <TreeGraph size={[this.state.screenWidth, this.state.screenHeight]} />

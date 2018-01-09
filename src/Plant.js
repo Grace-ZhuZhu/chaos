@@ -10,75 +10,111 @@ class Plant {
 		this.leafPos = [];
 		this.state_stack = [];
 		this.currentBranchIndex = 0;
-        this.flowerPercentage = productionSpecs.flowerPercentage;
-        this.totalFlowers = productionSpecs.totalFlowers
+        this.leafPercentage = productionSpecs.leafPercentage;
+        this.leafPercentage = productionSpecs.leafPercentage
 
 		this.init();
 	}
 
 	init() {
-		d3.xml("./simple-flower.svg",
+		d3.xml("./cherry-flower.svg",
 			(xml) => {
-				this.flowerSvg = xml.getElementsByTagName("svg")[0];
+				this.leafSvg = xml.getElementsByTagName("svg")[0];
         });
 		this.command = generateCommand(this.productionSpecs);
-		generateBranches(this);
-	}
+		this.generateBranches();
+    }
+    
 
-	draw(ctx, origin) {
-		ctx.beginPath();
-		ctx.lineWidth = 3;
-		ctx.lineCap = "round";
-		for (var i = 0; i < this.branches.length; i++) {
-		this.drawNextBranch(ctx, origin);
-		}
-	}
+    generateBranches(){
+        var branchLength = this.productionSpecs.branchLength;
+        
+        var currentState = {
+        position: {x: 0, y: 0}, 
+        angle: 90.0, 
+        level: 0.0 
+        }; 
+        var maxLevel = 0;
+        var branchIndex = 0; 
 
-	drawIsDone() {
-		return this.currentBranchIndex >= this.branches.length;
-	}
+        for (var i = 0; i < this.command.length; i++) {
+            var currentCommand = this.command[i];
+            var angle = currentState.angle;
+            var start = currentState.position; // Start position of a branch
 
-	drawNextBranch(ctx, origin) {
-		if (this.currentBranchIndex < this.branches.length) {
-			var branch = this.branches[this.currentBranchIndex]; // Current i
-			ctx.moveTo(branch.start.x + origin.x, origin.y - branch.start.y);
-			ctx.lineTo(branch.end.x + origin.x, origin.y - branch.end.y);
-			ctx.stroke();
-			this.currentBranchIndex ++;
-		}
-	}
+            if(currentCommand  === 'F'|| currentCommand  === 'X'){
+                var end = getBranchEnd(start, angle, branchLength);
+                this.branches.push({
+                start: start,
+                end: end  
+                });
+                currentState.position = end; // Move the current state to the end position
 
-	// To Remove
-	getNewFlowers(origin/*, n*/) {
-		var positions = this.getLeafPositions(origin/*, n*/);
-		return _.map(positions, function(d) {
-			return {
-			pos: d,
-			life: 0
-			};
-		})
-	}
+                branchIndex ++;
+                currentState.level ++;
 
-	// To Remove
-	getLeafPositions(origin/*, n*/) {
-		var currentBranchIndex = this.currentBranchIndex;
-		var availableLeafPos = _.filter(this.leafPos, function(d) { return d.branchIndex <= currentBranchIndex});
-		// n = n > availableLeafPos.length ? availableLeafPos.length : n;
-		var n = Math.round(this.flowerPercentage * availableLeafPos.length);
+                if(currentState.level > maxLevel)
+                    maxLevel = currentState.level;
+            }
+            else if(currentCommand === '+'){
+                currentState.angle += this.productionSpecs.delta;
+            }
+            else if(currentCommand === '-'){
+                currentState.angle -= this.productionSpecs.delta;
+            }
+            else if(currentCommand === '['){
+                // !Pitfall: currentState passed by reference
+                // this.state_stack.push(_.cloneDeep(currentState));
+                this.state_stack.push(_.clone(currentState));
+            }
+            else if(currentCommand === ']'){
+                /*
+                // Leaf: a rectangle to be mapped with a texture 
+                glm::vec4 point1 = glm::vec4( -0.5,  0.0, 0.0, 1.0);
+                glm::vec4 point2 = glm::vec4(0.5,  0.0, 0.0, 1.0);
+                glm::vec4 point3 = glm::vec4(0.5,  1.0, 0.0, 1.0);
+                glm::vec4 point4 = glm::vec4( -0.5,  1.0, 0.0, 1.0);
 
-		var randomLeafPos = _.times(n, function() { return _.sample(availableLeafPos)});
-		randomLeafPos = _.map(randomLeafPos, function(d) {
-		return {
-			x: d.position.x + origin.x,
-			y: origin.y - d.position.y
-		};
-		});
-		return _.uniq(randomLeafPos);
-	}
+                // glm::mat4 transform = glm::scale(glm::mat4(1), glm::vec3(branchLength/2.0, branchLength/2.0, 1.0)) * glm::rotate(glm::mat4(1), angle, glm::vec3(0.0, 0.0, -1)) * glm::translate(glm::mat4(1), start);
+                glm::mat4 transform = glm::scale(glm::mat4(1), glm::vec3(productionSpecs.leafLength, productionSpecs.leafLength, 1.0)) * glm::rotate(glm::mat4(1), angle, glm::vec3(0.0, 0.0, -1));
+                point1 = point1 * transform;  glm::vec3 leafPoint1 = start + glm::vec3(point1.x, point1.y, point1.z);
+                point2 = point2 * transform;  glm::vec3 leafPoint2 = start + glm::vec3(point2.x, point2.y, point2.z);
+                point3 = point3 * transform;  glm::vec3 leafPoint3 = start + glm::vec3(point3.x, point3.y, point3.z);
+                point4 = point4 * transform;  glm::vec3 leafPoint4 = start + glm::vec3(point4.x, point4.y, point4.z);
 
-	getFlowerPositions() {
-		return this.leafPos;
-	}
+                // Push back the current level for each vertex (altogether 6) of the leaf rectangle
+                float currentLevel = currentState.level;
+                this.leaves.push_back(leafPoint1);
+                this.leaf_texcoords.push_back(glm::vec2(0.0, 1.0)); this.leaf_levels.push_back(currentLevel);
+                this.leaves.push_back(leafPoint2);
+                this.leaf_texcoords.push_back(glm::vec2(1.0, 1.0)); this.leaf_levels.push_back(currentLevel);
+                this.leaves.push_back(leafPoint3);
+                this.leaf_texcoords.push_back(glm::vec2(1.0, 0.0)); this.leaf_levels.push_back(currentLevel);
+                this.leaves.push_back(leafPoint3);
+                this.leaf_texcoords.push_back(glm::vec2(1.0, 0.0)); this.leaf_levels.push_back(currentLevel);
+                this.leaves.push_back(leafPoint4);
+                this.leaf_texcoords.push_back(glm::vec2(0.0, 0.0)); this.leaf_levels.push_back(currentLevel);
+                this.leaves.push_back(leafPoint1);
+                this.leaf_texcoords.push_back(glm::vec2(0.0, 1.0)); this.leaf_levels.push_back(currentLevel);
+                */
+
+                _.assign(this.branches[branchIndex-1], {
+                    isLeafBranch: true,
+                    occupied: false 
+            });
+                
+                currentState = this.state_stack.pop(); 
+                
+            }
+        }
+
+        /* LATER
+        // Convert the levels of each leaf to the range of [0,1] 
+        for (vector<float>::iterator it = this.leaf_levels.begin(); it != this.leaf_levels.end(); ++it){
+            it = (it)/maxLevel; 
+        }
+        */
+    }
 }
 
 function generateCommand(productionSpecs){
@@ -107,96 +143,6 @@ function getBranchEnd(start, angle, branchLength) {
     x: start.x + Math.cos(theta) * branchLength,
     y: start.y + Math.sin(theta) * branchLength
   } 
-}
-
-function generateBranches(plant){
-      var branchLength = plant.productionSpecs.branchLength;
-      
-      var currentState = {
-        position: {x: 0, y: 0}, 
-        angle: 90.0, 
-        level: 0.0 
-      }; 
-      var maxLevel = 0;
-      var branchIndex = 0; 
-
-      for (var i = 0; i < plant.command.length; i++) {
-          var currentCommand = plant.command[i];
-          var angle = currentState.angle;
-          var start = currentState.position; // Start position of a branch
-
-          if(currentCommand  === 'F'|| currentCommand  === 'X'){
-              var end = getBranchEnd(start, angle, branchLength);
-              plant.branches.push({
-                start: start,
-                end: end  
-              });
-              currentState.position = end; // Move the current state to the end position
-
-              branchIndex ++;
-              currentState.level ++;
-
-              if(currentState.level > maxLevel)
-                  maxLevel = currentState.level;
-          }
-          else if(currentCommand === '+'){
-              currentState.angle += plant.productionSpecs.delta;
-          }
-          else if(currentCommand === '-'){
-              currentState.angle -= plant.productionSpecs.delta;
-          }
-          else if(currentCommand === '['){
-              // !Pitfall: currentState passed by reference
-              // plant.state_stack.push(_.cloneDeep(currentState));
-              plant.state_stack.push(_.clone(currentState));
-          }
-          else if(currentCommand === ']'){
-              /*
-              // Leaf: a rectangle to be mapped with a texture 
-              glm::vec4 point1 = glm::vec4( -0.5,  0.0, 0.0, 1.0);
-              glm::vec4 point2 = glm::vec4(0.5,  0.0, 0.0, 1.0);
-              glm::vec4 point3 = glm::vec4(0.5,  1.0, 0.0, 1.0);
-              glm::vec4 point4 = glm::vec4( -0.5,  1.0, 0.0, 1.0);
-
-              // glm::mat4 transform = glm::scale(glm::mat4(1), glm::vec3(branchLength/2.0, branchLength/2.0, 1.0)) * glm::rotate(glm::mat4(1), angle, glm::vec3(0.0, 0.0, -1)) * glm::translate(glm::mat4(1), start);
-              glm::mat4 transform = glm::scale(glm::mat4(1), glm::vec3(productionSpecs.leafLength, productionSpecs.leafLength, 1.0)) * glm::rotate(glm::mat4(1), angle, glm::vec3(0.0, 0.0, -1));
-              point1 = point1 * transform;  glm::vec3 leafPoint1 = start + glm::vec3(point1.x, point1.y, point1.z);
-              point2 = point2 * transform;  glm::vec3 leafPoint2 = start + glm::vec3(point2.x, point2.y, point2.z);
-              point3 = point3 * transform;  glm::vec3 leafPoint3 = start + glm::vec3(point3.x, point3.y, point3.z);
-              point4 = point4 * transform;  glm::vec3 leafPoint4 = start + glm::vec3(point4.x, point4.y, point4.z);
-
-              // Push back the current level for each vertex (altogether 6) of the leaf rectangle
-              float currentLevel = currentState.level;
-              plant.leaves.push_back(leafPoint1);
-              plant.leaf_texcoords.push_back(glm::vec2(0.0, 1.0)); plant.leaf_levels.push_back(currentLevel);
-              plant.leaves.push_back(leafPoint2);
-              plant.leaf_texcoords.push_back(glm::vec2(1.0, 1.0)); plant.leaf_levels.push_back(currentLevel);
-              plant.leaves.push_back(leafPoint3);
-              plant.leaf_texcoords.push_back(glm::vec2(1.0, 0.0)); plant.leaf_levels.push_back(currentLevel);
-              plant.leaves.push_back(leafPoint3);
-              plant.leaf_texcoords.push_back(glm::vec2(1.0, 0.0)); plant.leaf_levels.push_back(currentLevel);
-              plant.leaves.push_back(leafPoint4);
-              plant.leaf_texcoords.push_back(glm::vec2(0.0, 0.0)); plant.leaf_levels.push_back(currentLevel);
-              plant.leaves.push_back(leafPoint1);
-              plant.leaf_texcoords.push_back(glm::vec2(0.0, 1.0)); plant.leaf_levels.push_back(currentLevel);
-              */
-
-              _.assign(plant.branches[branchIndex-1], {
-                  isLeafBranch: true,
-                  hasLeaf: false 
-            });
-              
-              currentState = plant.state_stack.pop(); 
-              
-          }
-      }
-
-      /* LATER
-      // Convert the levels of each leaf to the range of [0,1] 
-      for (vector<float>::iterator it = plant.leaf_levels.begin(); it != plant.leaf_levels.end(); ++it){
-          it = (it)/maxLevel; 
-      }
-      */
 }
 
 export default Plant
