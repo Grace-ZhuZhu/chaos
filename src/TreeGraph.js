@@ -10,6 +10,7 @@ class TreeGraph extends Component {
 			leafs: [],
 		};
 
+		/*
 		const productionSpec = {
 				leafPercentage: .2,
 				branchLength: 6,
@@ -21,8 +22,9 @@ class TreeGraph extends Component {
 					"X->F[+X]F[-X]+X",
 					"F->FF"
 				]
-			};
-		this.tree = new Plant(productionSpec);
+			};*/
+
+		this.tree = new Plant(props.productionSpec);
 	}
 
 	componentDidMount() {
@@ -153,7 +155,8 @@ class TreeGraph extends Component {
   }
 
 	render() {
-		return <svg ref={node => this.node = node} width={this.props.size[0]} height={this.props.size[1]}>
+		const scale = Math.min(this.props.screenSize[0]/this.props.size[0], this.props.screenSize[1]/this.props.size[1]);
+		return <svg ref={node => this.node = node} width={this.props.size[0]} height={this.props.size[1]} transform={`scale(${scale}) translate(0,0)`}>
 		</svg>
 	}
 }
