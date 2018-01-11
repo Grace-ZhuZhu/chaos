@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Plant from './Plant'
 import * as d3 from 'd3'; 
+import { loadLeaf } from './loadLeaf'
 
 class TreeGraph extends Component {
 	constructor(props) {
@@ -10,8 +11,16 @@ class TreeGraph extends Component {
 			leafs: [],
 		};
 
-		this.tree = new Plant(props.productionSpec);
+		this.spec = props.productionSpec;
+		this.tree = new Plant(this.spec);
 	}
+
+	componentWillMount() {
+		loadLeaf(this.spec.leafPath)
+			.then((leafSvg) => {
+				this.leafSvg = leafSvg;
+			});
+	 }
 
 	componentDidMount() {
 		this.setState({
@@ -105,7 +114,7 @@ class TreeGraph extends Component {
 			.attr('y2', d => -d.end.y + origin.y);
 
 		// Draw leafs
-		const leafSvg = this.tree.leafSvg;
+		const leafSvg = this.leafSvg;
 		
 		let leafs = d3.select(node)
 			.selectAll(".leaf")
@@ -129,7 +138,7 @@ class TreeGraph extends Component {
 			})
 			.attr("x", d =>  d.end.x - 17.5 + origin.x)
 			.attr("y", d => -d.end.y - 16.5 + origin.y)
-			.attr("fill", "pink")
+			.attr("fill", this.spec.leafColor)
 			.attr("opacity", 0.7);
 
 		leafs.exit().filter(':not(.exiting)')

@@ -17,10 +17,6 @@ class Plant {
 	}
 
 	init() {
-		d3.xml("./cherry-flower.svg",
-			(xml) => {
-				this.leafSvg = xml.getElementsByTagName("svg")[0];
-        });
 		this.command = generateCommand(this.productionSpecs);
 		this.generateBranches();
     }
