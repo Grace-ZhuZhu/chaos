@@ -33,7 +33,7 @@ class TreeGraph extends Component {
 	 }
   
 	 tick() {
-		this.setState((prevState) => ({
+		this.setState(() => ({
 			branches: this.getBranches(),
 			leafs: this.getLeafs(),
 			request: requestAnimationFrame(() => this.tick())
@@ -41,9 +41,9 @@ class TreeGraph extends Component {
 	 }
 	
 	 getBranches() {
-		let branches = this.state.branches;
+		let {branches} = this.state;
 
-		const currentIndex = this.state.branches.length - 1;
+		const currentIndex = branches.length - 1;
 		const maxIndex = this.tree.branches.length - 1;
 
 	 	if (currentIndex < maxIndex) {
@@ -57,11 +57,13 @@ class TreeGraph extends Component {
 	}
 
 	getLeafs() {
-		const totalLeafBranches = this.state.branches.filter(branch => branch.isLeafBranch);		
+		let {branches, leafs} = this.state;
+
+		const totalLeafBranches = branches.filter(branch => branch.isLeafBranch);		
 		const freeLeafBranches = totalLeafBranches.filter(branch => !branch.occupied);
 
 		const totalLeafsNumber = Math.floor(totalLeafBranches.length * this.tree.leafPercentage);
-		const newLeafsNumber = totalLeafsNumber - this.state.leafs.length;
+		const newLeafsNumber = totalLeafsNumber - leafs.length;
 
 		let newLeafs = [];
 
@@ -72,14 +74,14 @@ class TreeGraph extends Component {
 				d.lifeStart = Date.now();
 			});
 		}		
-		this.state.leafs.forEach(d => {
+		leafs.forEach(d => {
 			if (Date.now() - d.lifeStart > 15000) {
 				d.occupied = false;
 				d.lifeStart = null;
 			}
 		})
-		_.remove(this.state.leafs, {occupied: false});
-		let allLeafs = _.union(this.state.leafs, newLeafs);
+		_.remove(leafs, {occupied: false});
+		let allLeafs = _.union(leafs, newLeafs);
 
 		return allLeafs;
 	}
@@ -93,11 +95,13 @@ class TreeGraph extends Component {
 			y: height
 		}
 
+		let {branches, leafs} = this.state;
+
 		// Draw branches
 		const node = this.node;
 		let branch = d3.select(node)
 			.selectAll('line')
-				.data(this.state.branches, d => d.key);
+				.data(branches, d => d.key);
 
 		branch.enter().append('line')
 			.attr('class', 'branch')
@@ -114,13 +118,13 @@ class TreeGraph extends Component {
 			.attr('y2', d => -d.end.y + origin.y);
 
 		// Draw leafs
-		const leafSvg = this.leafSvg;
-		
-		let leafs = d3.select(node)
+		let leaf = d3.select(node)
 			.selectAll(".leaf")
-			.data(this.state.leafs, d => d.key);
-
-		leafs.enter()
+			.data(leafs, d => d.key);
+		
+		const leafSvg = this.leafSvg;
+	
+		leaf.enter()
 			.append("svg")
 			.classed("leaf", true)
 			.attr('width', 35) // set the wanted size directly here!
@@ -141,12 +145,20 @@ class TreeGraph extends Component {
 			.attr("fill", this.spec.leafColor)
 			.attr("opacity", 0.7);
 
-		leafs.exit().filter(':not(.exiting)')
-		.classed('exiting', true)
-		.transition().duration(10000)
-		.attr('y', height)
-		.style('opacity', 0.1)
-		.remove();
+			if(this.spec.leafFalling) {
+				leaf.exit().filter(':not(.exiting)')
+				.classed('exiting', true)
+				.transition().duration(10000)
+				.attr('y', height)
+				.style('opacity', 0.1)
+				.remove();
+			} else {
+				leaf.exit().filter(':not(.exiting)')
+				.classed('exiting', true)
+				.transition().duration(10000)
+				.style('opacity', 0.1)
+				.remove();
+			}
   }
 
 	render() {

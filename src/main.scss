@@ -62,7 +62,6 @@ body {
 .dot-container {
     text-align: center;
     padding: 20px;
-    background: #ddd;
 }
 
 /* The dots/bullets/indicators */
@@ -78,6 +77,6 @@ body {
 }
 
 /* Add a background color to the active dot/circle */
-.active, .dot:hover {
+.active{
   background-color: #717171;
 }

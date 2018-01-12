@@ -6,7 +6,9 @@ class Plant {
 		this.productionSpecs = productionSpecs;
 		this.command = null;
 
-		this.branches = []; // calculate in cartesian coordinate system
+        // all points are calculated in cartesian coordinate system
+        // need to be translated to the screen coordinate system on drawing
+		this.branches = [];
 		this.leafPos = [];
 		this.state_stack = [];
 		this.currentBranchIndex = 0;
@@ -64,36 +66,6 @@ class Plant {
                 this.state_stack.push(_.clone(currentState));
             }
             else if(currentCommand === ']'){
-                /*
-                // Leaf: a rectangle to be mapped with a texture 
-                glm::vec4 point1 = glm::vec4( -0.5,  0.0, 0.0, 1.0);
-                glm::vec4 point2 = glm::vec4(0.5,  0.0, 0.0, 1.0);
-                glm::vec4 point3 = glm::vec4(0.5,  1.0, 0.0, 1.0);
-                glm::vec4 point4 = glm::vec4( -0.5,  1.0, 0.0, 1.0);
-
-                // glm::mat4 transform = glm::scale(glm::mat4(1), glm::vec3(branchLength/2.0, branchLength/2.0, 1.0)) * glm::rotate(glm::mat4(1), angle, glm::vec3(0.0, 0.0, -1)) * glm::translate(glm::mat4(1), start);
-                glm::mat4 transform = glm::scale(glm::mat4(1), glm::vec3(productionSpecs.leafLength, productionSpecs.leafLength, 1.0)) * glm::rotate(glm::mat4(1), angle, glm::vec3(0.0, 0.0, -1));
-                point1 = point1 * transform;  glm::vec3 leafPoint1 = start + glm::vec3(point1.x, point1.y, point1.z);
-                point2 = point2 * transform;  glm::vec3 leafPoint2 = start + glm::vec3(point2.x, point2.y, point2.z);
-                point3 = point3 * transform;  glm::vec3 leafPoint3 = start + glm::vec3(point3.x, point3.y, point3.z);
-                point4 = point4 * transform;  glm::vec3 leafPoint4 = start + glm::vec3(point4.x, point4.y, point4.z);
-
-                // Push back the current level for each vertex (altogether 6) of the leaf rectangle
-                float currentLevel = currentState.level;
-                this.leaves.push_back(leafPoint1);
-                this.leaf_texcoords.push_back(glm::vec2(0.0, 1.0)); this.leaf_levels.push_back(currentLevel);
-                this.leaves.push_back(leafPoint2);
-                this.leaf_texcoords.push_back(glm::vec2(1.0, 1.0)); this.leaf_levels.push_back(currentLevel);
-                this.leaves.push_back(leafPoint3);
-                this.leaf_texcoords.push_back(glm::vec2(1.0, 0.0)); this.leaf_levels.push_back(currentLevel);
-                this.leaves.push_back(leafPoint3);
-                this.leaf_texcoords.push_back(glm::vec2(1.0, 0.0)); this.leaf_levels.push_back(currentLevel);
-                this.leaves.push_back(leafPoint4);
-                this.leaf_texcoords.push_back(glm::vec2(0.0, 0.0)); this.leaf_levels.push_back(currentLevel);
-                this.leaves.push_back(leafPoint1);
-                this.leaf_texcoords.push_back(glm::vec2(0.0, 1.0)); this.leaf_levels.push_back(currentLevel);
-                */
-
                 _.assign(this.branches[branchIndex-1], {
                     isLeafBranch: true,
                     occupied: false 
@@ -103,13 +75,6 @@ class Plant {
                 
             }
         }
-
-        /* LATER
-        // Convert the levels of each leaf to the range of [0,1] 
-        for (vector<float>::iterator it = this.leaf_levels.begin(); it != this.leaf_levels.end(); ++it){
-            it = (it)/maxLevel; 
-        }
-        */
     }
 }
 
