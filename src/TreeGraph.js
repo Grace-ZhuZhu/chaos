@@ -68,14 +68,14 @@ class TreeGraph extends Component {
 		let newLeafs = [];
 
 		if (freeLeafBranches.length && newLeafsNumber) {
-			newLeafs = _.sampleSize(freeLeafBranches, newLeafsNumber);
+			newLeafs = _.sampleSize(freeLeafBranches, 1/* newLeafsNumber */);
 			newLeafs.forEach(d => {
 				d.occupied = true;
 				d.lifeStart = Date.now();
 			});
 		}		
 		leafs.forEach(d => {
-			if (Date.now() - d.lifeStart > 15000) {
+			if (Date.now() - d.lifeStart > this.spec.leafLife) {
 				d.occupied = false;
 				d.lifeStart = null;
 			}
@@ -123,6 +123,7 @@ class TreeGraph extends Component {
 			.data(leafs, d => d.key);
 		
 		const leafSvg = this.leafSvg;
+		const leafLife = this.spec.leafLife;
 	
 		leaf.enter()
 			.append("svg")
@@ -137,7 +138,9 @@ class TreeGraph extends Component {
 						.select("svg")
 						.select("g")
 						.attr("transform", "scale(0.5, 0.5)")
-						.transition().duration(10000)
+						.transition()
+						.duration(leafLife)
+						.ease(d3.easeExpOut)
 						.attr("transform", "scale(1, 1)");
 			})
 			.attr("x", d =>  d.end.x - 17.5 + origin.x)
@@ -155,7 +158,7 @@ class TreeGraph extends Component {
 			} else {
 				leaf.exit().filter(':not(.exiting)')
 				.classed('exiting', true)
-				.transition().duration(10000)
+				.transition().duration(5000)
 				.style('opacity', 0.1)
 				.remove();
 			}
