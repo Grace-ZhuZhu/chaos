@@ -6,36 +6,40 @@ class Slider extends Component {
     super(props);
     this.state = { 
       currentSlide: 0,
-      availableSlides: 1
+      availableSlides: new Set([0])
     };
   }
 
   onClickPrev = () => {
-    this.setState((prevState, props) => ({
-      currentSlide: prevState.currentSlide === 0 ? props.children.length -1 : prevState.currentSlide -1
-    }));
+    const currentSlide = this.state.currentSlide === 0 ? this.props.children.length -1 : this.state.currentSlide -1;
+    const availableSlides = this.state.availableSlides.add(currentSlide);
+    this.setState({
+      currentSlide,
+      availableSlides,
+    });
   }
 
   onClickNext = () => {
-    this.setState((prevState, props) => ({
-      currentSlide: prevState.currentSlide === props.children.length -1 ?  0 : prevState.currentSlide + 1,
-      availableSlides: Math.min(prevState.availableSlides + 1, props.children.length)
-    }));
+    const currentSlide = this.state.currentSlide === this.props.children.length -1 ?  0 : this.state.currentSlide + 1;
+    const availableSlides = this.state.availableSlides.add(currentSlide);
+    this.setState({
+      currentSlide,
+      availableSlides,
+    });
   }
 
   render() {
     const { currentSlide, availableSlides } = this.state;
 
-    const children = React.Children.toArray(this.props.children);
-    const availableChildren = children.slice(0, availableSlides);    
-
-    const slides = availableChildren.map((child, index) => {
-      const display = index === currentSlide ? 'block' : 'none';
-      return (
-        <div key={index} className="slide" style={{display: display}}> 
-          {child} 
-        </div>
-      )
+    const slides = React.Children.map(this.props.children, (child, index) => {
+      if (availableSlides.has(index)) {
+        const display = index === currentSlide ? 'block' : 'none';
+        return (
+          <div key={index} className="slide" style={{display: display}}> 
+            {child} 
+          </div>
+        )
+      }
     });
 
     const dots = this.props.children.map((child, index) => {
