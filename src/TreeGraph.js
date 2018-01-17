@@ -87,8 +87,8 @@ class TreeGraph extends Component {
 	}
 
 	componentDidUpdate() {
-		const width = this.props.size[0];
-		const height = this.props.size[1];
+		const width = this.props.svgSize.treeWidth;
+		const height = this.props.svgSize.height;
 
 		const origin = {
 			x: width/2,
@@ -165,10 +165,43 @@ class TreeGraph extends Component {
   }
 
 	render() {
-		let scale = Math.min(this.props.screenSize[0]/this.props.size[0], this.props.screenSize[1]/this.props.size[1]);
+		const {
+			svgSize,
+			screenSize,
+			productionSpec
+		} = this.props;
+
+		const svgWidth = svgSize.treeWidth + svgSize.commandWidth;
+		const svgHeight = svgSize.height;
+		let scale = Math.min(screenSize.width/svgWidth, screenSize.height/svgSize.height);
 		scale = Math.min(scale, 1);
-		return <svg ref={node => this.node = node} width={this.props.size[0]} height={this.props.size[1]} transform={`scale(${scale}) translate(0,0)`}>
-		</svg>
+
+		const command = productionSpec;
+		const commandToString = [
+			`Command:`,
+			`initiator: ${command.initiator}`,
+			`production rules:`,
+			`${command.productionRules.join(',   ')}`,
+			`number of recursions: ${command.n}`,
+			`branching angle: ${command.delta}`,
+
+		];
+	const commandText = commandToString.map(text => (<tspan x="0" dy="2em">{text}</tspan>))
+
+	// <g  transform={`scale(${scale}) translate(0,0)`}>
+	// </g>
+
+		return (
+			<svg className='canvas' width={svgWidth} height={svgHeight} transform={`scale(${scale})`}>
+				<g ref={node => this.node = node} width={svgSize.treeWidth} height={svgHeight}>
+				</g>
+				<g transform={`translate(${svgSize.treeWidth},0)`}>
+					<text x="0" y="15" fontFamily="sans-serif" fontSize="20px" fill="#5a5852">
+						{commandText}
+					</text>
+				</g>
+			</svg>
+		)
 	}
 }
 

@@ -2,7 +2,8 @@ import * as d3 from 'd3';
 import React, { Component } from 'react';
 import TreeGraph from './TreeGraph';
 import Slider from './Slider';
-import { TreeSpec1, TreeSpec2, TreeSpec3, TreeSpec4 } from './TreeSpecs';
+// import { TreeSpec1, TreeSpec2, TreeSpec3, TreeSpec4 } from './TreeSpecs';
+import * as treeSpecs from './TreeSpecs';
 
 class App extends Component {
   constructor(props){
@@ -27,16 +28,17 @@ class App extends Component {
   }
 
   render() {
+    const specs = _.values(treeSpecs);
+    const treeGraphs = specs.map(spec => (
+      <TreeGraph productionSpec={spec} svgSize={{treeWidth: 600, commandWidth: 300, height: 750}} screenSize={{width: this.state.screenWidth, height: this.state.screenHeight}} />
+    ))
     return (
       <div className="App">
         <div className="App-header">
           <h5>L System</h5>
         </div>
         <Slider>
-          <TreeGraph productionSpec={TreeSpec1} size={[600, 750]} screenSize={[this.state.screenWidth, this.state.screenHeight]} />
-          <TreeGraph productionSpec={TreeSpec2} size={[600, 750]} screenSize={[this.state.screenWidth, this.state.screenHeight]} />
-          <TreeGraph productionSpec={TreeSpec3} size={[600, 750]} screenSize={[this.state.screenWidth, this.state.screenHeight]} />
-          <TreeGraph productionSpec={TreeSpec4} size={[600, 750]} screenSize={[this.state.screenWidth, this.state.screenHeight]} />
+          {treeGraphs}
         </Slider>
       </div>
     )
