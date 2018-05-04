@@ -9,10 +9,32 @@ body {
 }
 
 .App-header {
-  background-color: #222;
+  width: 100%; 
+  overflow: auto;
+  background: #1E1E20;
   padding: 5px;
   color: white;
 }
+
+.App-header a {
+  float: left;
+  text-align: center;
+  width: 10%;
+  transition: all 0.3s ease;
+  color: white;
+  font-size: 36px;
+}
+
+.App-header a:hover {
+  background-color: #000;
+}
+
+.App-header a.active {
+  background-color: #383f38;
+}
+
+
+/* Slider */
 
 .slides-container {
   position:relative;
@@ -23,7 +45,19 @@ body {
   padding: 10px;
 }
 
-/* Next & previous buttons */
+.slide:nth-child(1) {
+  background: darkslategray;
+}
+.slide:nth-child(2) {
+  background: darkslateblue;
+}
+.slide:nth-child(3) {
+  background: darkslategray;
+}
+.slide:nth-child(4) {
+  background: rebeccapurple;
+}
+
 .prev, .next {
   cursor: pointer;
   position: absolute;
@@ -38,33 +72,28 @@ body {
   user-select: none;
 }
 
-/* Position the "next button" to the right */
 .prev {
   position: absolute;
   left: 0;
   border-radius: 3px 0 0 3px;
 }
 
-/* Position the "next button" to the right */
 .next {
   position: absolute;
   right: 0;
   border-radius: 3px 0 0 3px;
 }
 
-/* On hover, add a black background color with a little bit see-through */
 .prev:hover, .next:hover {
   background-color: rgba(0,0,0,0.8);
   color: white;
 }
 
-/* The dot/bullet/indicator container */
 .dot-container {
     text-align: center;
     padding: 20px;
 }
 
-/* The dots/bullets/indicators */
 .dot {
   cursor: pointer;
   height: 15px;
@@ -76,12 +105,52 @@ body {
   transition: background-color 0.6s ease;
 }
 
-/* Add a background color to the active dot/circle */
 .active{
   background-color: #717171;
 }
 
-.canvas {
+
+/* SVG */
+
+svg .canvas {
   display: block;
   margin: auto;
+}
+
+
+/* Article */
+
+.accordion {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+}
+
+.accordion:after {
+  content: '\02795'; /* Unicode character for "plus" sign (+) */
+  font-size: 13px;
+  color: #777;
+  float: right;
+  margin-left: 5px;
+}
+
+.accordion.active, .accordion:hover {
+  background-color: #ccc;
+}
+
+.accordion.active:after {
+  content: "\2796"; /* Unicode character for "minus" sign (-) */
+}
+
+.accordion.panel {
+  padding: 0 18px;
+  background-color: white;
+  display: none;
+  overflow: hidden;
 }
