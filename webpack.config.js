@@ -1,7 +1,7 @@
 const path = require('path');
 
 const HtmlWebPackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const paths = {
@@ -13,9 +13,8 @@ const htmlPlugin = new HtmlWebPackPlugin({
     template: './src/index.html',
     filename: './index.html',
 });
-const extractTextPlugin = new ExtractTextPlugin({
+const miniCssExtractPlugin = new MiniCssExtractPlugin({
     filename: 'main.bundle.css',
-    allChunks: true,
 });
 const copyWebpackPlugin = new CopyWebpackPlugin([
     {
@@ -45,9 +44,7 @@ module.exports = {
             },
             {
                 test: /\.scss$/,
-                use: ExtractTextPlugin.extract([
-                    'css-loader', 'sass-loader',
-                ]),
+                use: ['style-loader', MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
             },
         ],
     },
@@ -59,7 +56,7 @@ module.exports = {
     },
     plugins: [
         htmlPlugin,
-        extractTextPlugin,
+        miniCssExtractPlugin,
         copyWebpackPlugin,
     ],
 };
