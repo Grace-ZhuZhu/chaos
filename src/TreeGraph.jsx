@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import * as d3 from 'd3';
 import _ from 'lodash';
 import Plant from './Plant.jsx';
-import { loadLeaf } from './loadLeaf.jsx';
 
 class TreeGraph extends Component {
     constructor(props) {
