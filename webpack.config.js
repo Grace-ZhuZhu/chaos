@@ -30,17 +30,21 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.jsx?/,
-                include: path.src,
+                test: /\.(js|jsx)$/,
                 loader: 'babel-loader',
+                exclude: /node_modules/,
+                query: {
+                    presets: ['env', 'react'],
+                    plugins: ['transform-class-properties'],
+                },
             },
             {
-                test: /\.js$/,
-                exclude: [/node_modules/],
-                use: [{
-                    loader: 'babel-loader',
-                    options: { presets: ['es2015', 'stage-0'] },
-                }],
+                test: /\.html$/,
+                use: [
+                    {
+                        loader: 'html-loader',
+                    },
+                ],
             },
             {
                 test: /\.scss$/,
@@ -51,7 +55,7 @@ module.exports = {
     devServer: {
         contentBase: paths.dist,
         compress: true,
-        port: '4800',
+        port: '3001',
         stats: 'errors-only',
     },
     plugins: [

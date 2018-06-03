@@ -9,7 +9,7 @@ class Slider extends Component {
         };
     }
 
-    onClickPrev() {
+    onClickPrev = () => {
         const currentSlide = this.state.currentSlide === 0 ?
             this.props.children.length - 1 : this.state.currentSlide - 1;
 
@@ -21,7 +21,7 @@ class Slider extends Component {
         });
     }
 
-    onClickNext() {
+    onClickNext = () => {
         const currentSlide = this.state.currentSlide === this.props.children.length - 1 ?
             0 : this.state.currentSlide + 1;
 
