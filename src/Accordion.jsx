@@ -1,3 +1,4 @@
+/* eslint-disable react/prefer-stateless-function, react/prop-types */
 import React, { Component } from 'react';
 
 class Accordion extends Component {

@@ -11,7 +11,7 @@ body {
 .App-header {
   width: 100%; 
   overflow: auto;
-  background: #1E1E20;
+  background: rgb(53, 44, 44);
   padding: 5px;
   color: white;
 }
@@ -46,16 +46,16 @@ body {
 }
 
 .slide:nth-child(1) {
-  background: darkslategray;
+  background: rgba(47, 79,	79, 0.7);
 }
 .slide:nth-child(2) {
   background: darkslateblue;
 }
 .slide:nth-child(3) {
-  background: darkslategray;
+  background: #80adcc;
 }
 .slide:nth-child(4) {
-  background: rebeccapurple;
+  background: #dcd0ca;
 }
 
 .prev, .next {

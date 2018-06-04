@@ -3,7 +3,6 @@ import _ from 'lodash';
 import TreeGraph from './TreeGraph.jsx';
 import Slider from './Slider.jsx';
 import Header from './Header.jsx';
-import Accordion from './Accordion.jsx';
 import * as treeSpecs from './TreeSpecs.jsx';
 
 export default class App extends Component {
@@ -35,6 +34,7 @@ export default class App extends Component {
                 productionSpec={spec}
                 svgSize={{ treeWidth: 600, commandWidth: 300, height: 750 }}
                 screenSize={{ width: this.state.screenWidth, height: this.state.screenHeight }}
+                key={spec.id}
             />
         ));
 
@@ -48,10 +48,6 @@ export default class App extends Component {
             <div className="App">
                 <Header title="L System Examples" />
                 { GraphSection }
-
-                <Accordion>
-                    {}
-                </Accordion>
             </div>
         );
     }

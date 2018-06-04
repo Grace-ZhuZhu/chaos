@@ -1,3 +1,4 @@
+/* eslint-disable func-names, no-return-assign, react/prop-types */
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import _ from 'lodash';
@@ -18,7 +19,7 @@ class TreeGraph extends Component {
     componentWillMount() {
         d3.xml(this.spec.leafPath)
             .then((xml) => {
-                this.leafSvg = xml.getElementsByTagName('svg')[0];
+                [this.leafSvg] = xml.getElementsByTagName('svg');
             });
     }
 
@@ -26,6 +27,87 @@ class TreeGraph extends Component {
         this.setState({
 		   request: requestAnimationFrame(() => this.tick()),
         });
+    }
+
+    componentDidUpdate() {
+        const {
+            treeWidth: width,
+            height,
+        } = this.props.svgSize;
+
+        const origin = {
+            x: width / 2,
+            y: height,
+        };
+
+        const { branches, leafs } = this.state;
+        const { node } = this;
+
+        const branch = d3.select(node)
+            .selectAll('line')
+            .data(branches, d => d.key);
+
+        branch.enter().append('line')
+            .attr('class', 'branch')
+            .attr('x1', d => d.start.x + origin.x)
+            .attr('y1', d => -d.start.y + origin.y)
+            .attr('x2', d => d.start.x + origin.x)
+            .attr('y2', d => -d.start.y + origin.y)
+            .style('stroke', '#65615c')
+            .style('stroke-width', 3)
+            .transition()
+            .duration(500)
+            .attr('x1', d => d.start.x + origin.x)
+            .attr('y1', d => -d.start.y + origin.y)
+            .attr('x2', d => d.end.x + origin.x)
+            .attr('y2', d => -d.end.y + origin.y);
+
+        const leaf = d3.select(node)
+            .selectAll('.leaf')
+            .data(leafs, d => d.key);
+
+        const { leafSvg } = this;
+        const { leafLife } = this.spec;
+
+        leaf.enter()
+            .append('svg')
+            .classed('leaf', true)
+            .attr('width', 35) // set the wanted size directly here!
+            .attr('height', 33)
+            .each(function () {
+                this
+                    .append(leafSvg.cloneNode(true));
+                d3
+                    .select(this)
+                    .select('svg')
+                    .select('g')
+                    .attr('transform', 'scale(0.5, 0.5)')
+                    .transition()
+                    .duration(leafLife)
+                    .ease(d3.easeExpOut)
+                    .attr('transform', 'scale(1, 1)');
+            })
+            .attr('x', d => d.end.x - 17.5 + origin.x)
+            .attr('y', d => -d.end.y - 16.5 + origin.y)
+            .attr('fill', this.spec.leafColor)
+            .attr('opacity', 0.7);
+
+        if (this.spec.leafFalling) {
+            leaf.exit().filter(':not(.exiting)')
+                .classed('exiting', true)
+                .transition()
+                .duration(10000)
+                .attr('y', height)
+                .style('opacity', 0.1)
+                .remove();
+        } else {
+            leaf.exit().filter(':not(.exiting)')
+                .classed('exiting', true)
+                .transition()
+                .duration(5000)
+                .style('opacity', 0.1)
+                .remove();
+        }
     }
 
     componentWillUnmount() {
@@ -78,6 +160,27 @@ class TreeGraph extends Component {
         return allLeafs;
     }
 
+    getCommandText() {
+        const command = this.props.productionSpec;
+        const commandToString = [
+            'Command:',
+            `initiator: ${command.initiator}`,
+            'production rules:',
+            `${command.productionRules.join(',   ')}`,
+            `number of recursions: ${command.n}`,
+            `branching angle: ${command.delta}`,
+
+        ];
+        return commandToString.map(text => (
+            <tspan
+                x="0"
+                dy="2em"
+            >
+                {text}
+            </tspan>
+        ));
+    }
+
     tick() {
         this.setState(() => ({
             branches: this.getBranches(),
@@ -86,92 +189,10 @@ class TreeGraph extends Component {
         }));
     }
 
-    componentDidUpdate() {
-        const width = this.props.svgSize.treeWidth;
-        const height = this.props.svgSize.height;
-
-        const origin = {
-            x: width / 2,
-            y: height,
-        };
-
-        const { branches, leafs } = this.state;
-
-        // Draw branches
-        const node = this.node;
-        const branch = d3.select(node)
-            .selectAll('line')
-            .data(branches, d => d.key);
-
-        branch.enter().append('line')
-            .attr('class', 'branch')
-            .attr('x1', d => d.start.x + origin.x)
-            .attr('y1', d => -d.start.y + origin.y)
-            .attr('x2', d => d.start.x + origin.x)
-            .attr('y2', d => -d.start.y + origin.y)
-            .style('stroke', '#65615c')
-            .style('stroke-width', 3)
-            .transition()
-            .duration(500)
-            .attr('x1', d => d.start.x + origin.x)
-            .attr('y1', d => -d.start.y + origin.y)
-            .attr('x2', d => d.end.x + origin.x)
-            .attr('y2', d => -d.end.y + origin.y);
-
-        // Draw leafs
-        const leaf = d3.select(node)
-            .selectAll('.leaf')
-            .data(leafs, d => d.key);
-
-        const leafSvg = this.leafSvg;
-        const leafLife = this.spec.leafLife;
-
-        leaf.enter()
-            .append('svg')
-            .classed('leaf', true)
-            .attr('width', 35) // set the wanted size directly here!
-            .attr('height', 33)
-            .each(function () {
-                this
-                    .append(leafSvg.cloneNode(true));
-                d3
-                    .select(this)
-                    .select('svg')
-                    .select('g')
-                    .attr('transform', 'scale(0.5, 0.5)')
-                    .transition()
-                    .duration(leafLife)
-                    .ease(d3.easeExpOut)
-                    .attr('transform', 'scale(1, 1)');
-            })
-            .attr('x', d => d.end.x - 17.5 + origin.x)
-            .attr('y', d => -d.end.y - 16.5 + origin.y)
-            .attr('fill', this.spec.leafColor)
-            .attr('opacity', 0.7);
-
-        if (this.spec.leafFalling) {
-            leaf.exit().filter(':not(.exiting)')
-                .classed('exiting', true)
-                .transition()
-                .duration(10000)
-                .attr('y', height)
-                .style('opacity', 0.1)
-                .remove();
-        } else {
-            leaf.exit().filter(':not(.exiting)')
-                .classed('exiting', true)
-                .transition()
-                .duration(5000)
-                .style('opacity', 0.1)
-                .remove();
-        }
-    }
-
     render() {
         const {
             svgSize,
             screenSize,
-            productionSpec,
         } = this.props;
 
         const svgWidth = svgSize.treeWidth + svgSize.commandWidth;
@@ -182,23 +203,29 @@ class TreeGraph extends Component {
         const translateX = svgWidth * (scale - 1);
         const translateY = svgHeight * (scale - 1);
 
-        const command = productionSpec;
-        const commandToString = [
-            'Command:',
-            `initiator: ${command.initiator}`,
-            'production rules:',
-            `${command.productionRules.join(',   ')}`,
-            `number of recursions: ${command.n}`,
-            `branching angle: ${command.delta}`,
-
-        ];
-        const commandText = commandToString.map(text => (<tspan x="0" dy="2em">{text}</tspan>));
+        const commandText = this.getCommandText();
 
         return (
-            <svg className="canvas" width={svgWidth} height={svgHeight} transform={`scale(${scale}) translate(${translateX},${translateY})`}>
-                <g ref={node => this.node = node} width={svgSize.treeWidth} height={svgHeight} />
+            <svg
+                className="canvas"
+                width={svgWidth}
+                height={svgHeight}
+                transform={`scale(${scale}) translate(${translateX},${translateY})`}
+            >
+                <g
+                    ref={node => this.node = node}
+                    width={svgSize.treeWidth}
+                    height={svgHeight}
+                />
+
                 <g transform={`translate(${svgSize.treeWidth},0)`}>
-                    <text x="0" y="15" fontFamily="sans-serif" fontSize="20px" fill="white">
+                    <text
+                        x="0"
+                        y="15"
+                        fontFamily="sans-serif"
+                        fontSize="20px"
+                        fill="white"
+                    >
                         {commandText}
                     </text>
                 </g>

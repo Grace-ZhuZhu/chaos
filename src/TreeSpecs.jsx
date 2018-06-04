@@ -1,4 +1,5 @@
 export const TreeSpec1 = {
+    id: 'tree-1',
     leafPath: '/data/img/cherry-flower.svg',
     leafColor: 'pink',
     leafPercentage: 0.2,
@@ -15,6 +16,7 @@ export const TreeSpec1 = {
 };
 
 export const TreeSpec2 = {
+    id: 'tree-2',
     leafPath: '/data/img/cherry-flower.svg',
     leafColor: '#ff748a',
     leafPercentage: 0.5,
@@ -31,6 +33,7 @@ export const TreeSpec2 = {
 };
 
 export const TreeSpec3 = {
+    id: 'tree-3',
     leafPath: '/data/img/flower0.svg',
     leafColor: '#ffc03a',
     leafPercentage: 0.7,
@@ -46,8 +49,9 @@ export const TreeSpec3 = {
 };
 
 export const TreeSpec4 = {
+    id: 'tree-4',
     leafPath: '/data/img/flower.svg',
-    leafColor: '#ffc6a4',
+    leafColor: '#DE5233',
     leafPercentage: 0.7,
     leafLife: 5000,
     leafFalling: false,

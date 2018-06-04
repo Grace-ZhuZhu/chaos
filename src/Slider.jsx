@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { Component } from 'react';
 
 class Slider extends Component {
@@ -40,17 +41,18 @@ class Slider extends Component {
             if (availableSlides.has(index)) {
                 const display = index === currentSlide ? 'block' : 'none';
                 return (
-                    <div key={index} className="slide" style={{ display }}>
+                    <div key={child.key} className="slide" style={{ display }}>
                         {child}
                     </div>
                 );
             }
+            return null;
         });
 
         const dots = this.props.children.map((child, index) => {
             const active = index === currentSlide ? 'active' : '';
             return (
-                <span key={index} className={`dot ${active}`} />
+                <span key={child.key} className={`dot ${active}`} />
             );
         });
 
@@ -58,8 +60,8 @@ class Slider extends Component {
             <div className="slider">
                 <div className="slides-container">
                     {slides}
-                    <a className="prev" onClick={this.onClickPrev}>❮</a>
-                    <a className="next" onClick={this.onClickNext}>❯</a>
+                    <button className="prev" onClick={this.onClickPrev}>❮</button>
+                    <button className="next" onClick={this.onClickNext}>❯</button>
                 </div>
                 <div className="dot-container">
                     {dots}

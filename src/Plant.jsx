@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { generateCommand, getBranchEnd } from './PlantService.jsx';
 
 class Plant {
     constructor(productionSpecs) {
@@ -24,7 +25,7 @@ class Plant {
 
 
     generateBranches() {
-        const branchLength = this.productionSpecs.branchLength;
+        const { branchLength } = this.productionSpecs;
 
         let currentState = {
             position: { x: 0, y: 0 },
@@ -34,9 +35,9 @@ class Plant {
         let maxLevel = 0;
         let branchIndex = 0;
 
-        for (let i = 0; i < this.command.length; i++) {
+        for (let i = 0; i < this.command.length; i += 1) {
             const currentCommand = this.command[i];
-            const angle = currentState.angle;
+            const { angle } = currentState;
             const start = currentState.position; // Start position of a branch
 
             if (currentCommand === 'F' || currentCommand === 'X') {
@@ -47,8 +48,8 @@ class Plant {
                 });
                 currentState.position = end; // Move the current state to the end position
 
-                branchIndex++;
-                currentState.level ++;
+                branchIndex += 1;
+                currentState.level += 1;
 
                 if (currentState.level > maxLevel) { maxLevel = currentState.level; }
             }
@@ -77,34 +78,6 @@ class Plant {
             }
         }
     }
-}
-
-function generateCommand(productionSpecs) {
-    let command = productionSpecs.initiator;
-    for (let i = 0; i < productionSpecs.n; i++) {
-        for (let j = 0; j < productionSpecs.productionRules.length; j++) {
-            const p = productionSpecs.productionRules[j];
-            const parts = p.split('->');
-            const right = parts.pop();
-            const left = parts.pop();
-            const reg = new RegExp(left, 'g');
-            command = command.replace(reg, right);
-        }
-    }
-
-    return command;
-}
-
-function toRadians(degrees) {
-    return degrees * Math.PI / 180;
-}
-
-function getBranchEnd(start, angle, branchLength) {
-    const theta = toRadians(angle);
-    return {
-        x: start.x + Math.cos(theta) * branchLength,
-        y: start.y + Math.sin(theta) * branchLength,
-    };
 }
 
 export default Plant;
