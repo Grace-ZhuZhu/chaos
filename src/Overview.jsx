@@ -54,10 +54,23 @@ export class Overview extends Component {
             .call(this.redrawSite);
     }
 
+    getHeight = () => {
+        const height = (ITEM_MIN_AREA * this.props.count) / OVERVIEW_WIDTH;
+        return Math.round(height);
+    }
 
-    moved = () => {
-        this.sites[0] = d3.mouse(this);
-        this.redraw();
+    handleMouseOver(d) {
+        d3.selectAll('path')
+            .style('fill', 'black')
+            .style('opacity', 0.05);
+
+        d3.select(this)
+            .style('fill', '#f00')
+            .style('opacity', 1);
+    }
+
+    handleMouseOut() {
+
     }
 
     redraw = () => {
@@ -69,9 +82,11 @@ export class Overview extends Component {
         this.site = this.site.data(this.sites).call(this.redrawSite);
     }
 
-    redrawPolygon(polygon) {
+    redrawPolygon = (polygon) => {
         polygon
-            .attr('d', d => (d ? `M${d.join('L')}Z` : null));
+            .attr('d', d => (d ? `M${d.join('L')}Z` : null))
+            .on('mouseover', this.handleMouseOver)
+            .on('mouseout', this.handleMouseOut);
     }
 
     redrawLink(link) {
@@ -88,10 +103,9 @@ export class Overview extends Component {
             .attr('cy', d => d[1]);
     }
 
-    getHeight = () => {
-        const height = (ITEM_MIN_AREA * this.props.count) / OVERVIEW_WIDTH;
-
-        return Math.round(height);
+    moved = () => {
+        this.sites[0] = d3.mouse(this);
+        this.redraw();
     }
 
     render() {
