@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { Overview } from './Overview.jsx';
+
+const HEADER_HEIGHT = 250;
 
 export default class App extends Component {
     constructor(props) {
@@ -18,32 +21,39 @@ export default class App extends Component {
     onResize() {
         this.setState({
             screenWidth: window.innerWidth,
-            screenHeight: window.innerHeight - 120,
+            screenHeight: window.innerHeight - HEADER_HEIGHT,
         });
     }
 
     render() {
         return (
-            <article id="wrap">
+            <div className="flex-container">
 
-                <div className="header">
-                    <h1 className="header_logo">CHAOS</h1>
-                    <h5 className="header_subline"> Orders in Disorder </h5>
-                </div>
+                <header className="header-section">
+                    <div className="header-title">
+                        <h1 className="header-logo">CHAOS</h1>
+                        <h5 className="header-subline"> Orders in Disorder </h5>
+                    </div>
 
-                <article id="lightings">
-                    <section id="one">
-                        <section id="two">
-                            <section id="three">
-                                <section id="four">
-                                    <section id="five" />
+                    <div id="lightings">
+                        <section id="one">
+                            <section id="two">
+                                <section id="three">
+                                    <section id="four">
+                                        <section id="five" />
+                                    </section>
                                 </section>
                             </section>
                         </section>
-                    </section>
-                </article>
+                    </div>
+                </header>
 
-            </article>
+                <Overview
+                    screenWidth={this.state.screenWidth}
+                    screenHeight={this.state.screenHeight}
+                    count={4}
+                />
+            </div>
         );
     }
 }

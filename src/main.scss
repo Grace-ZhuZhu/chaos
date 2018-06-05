@@ -13,6 +13,25 @@ body {
   background: url(https://www.brainpickings.org/wp-content/themes/brainpickings/images/bckgd_body.png);
 }
 
+
+.flex-container
+{
+  width: 100%;
+  height: 100%;
+	margin: 0 auto 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: inline-flex;
+  flex: 1;
+}
+
+section.overview {
+  flex: 1;
+}
+
 .offset {
   margin-top: 0;
   padding-top: 270px;
@@ -20,7 +39,7 @@ body {
   transition: .3s;
 }
 
-.header {
+.header-title {
   position: fixed;
   width: 100%;
   height: 250px;
@@ -28,7 +47,7 @@ body {
   text-align: center;
   background: darkseagreen;
   transition: .3s;
-  // header shrinks when .small added to .header
+  // header shrinks when .small added to .header-title
   &.small {
     height: 70px;
     box-shadow: 0 0 5px rgba(black, .2);
@@ -37,7 +56,7 @@ body {
       padding-top: 140px;
     }
     // when header.small change logo pad & font size
-    .header_logo {
+    .header-logo {
       padding-top: 20px;
       font-size: 20px;
       text-shadow: none;
@@ -45,7 +64,7 @@ body {
   }
 }
 
-.header_logo {
+.header-logo {
   font-family: 'Oswald', sans-serif;
   margin: 0;
   padding-top: 80px;
@@ -56,23 +75,14 @@ body {
   transition: .3s;
 }
 
-.header_subline {
+.header-subline {
   color: rgba(47, 79,	79, 0.7);
-}
-
-#wrap
-{
-	width: 100%;
-	height: 100%;
-	position: relative;
-	margin: 0 auto 0 auto;
-	overflow: hidden;
 }
 
 #lightings
 {
+  position: fixed;
 	top: -60px;
-	position: absolute;
 	width: 100%;
 }
 
@@ -287,6 +297,35 @@ box-shadow: 0 0 250px 20px #42F2A1;
 
 to { box-shadow: 0 0 100px 15px #F4F6AD; }
 }
+
+
+
+
+/* Overview */
+
+.links {
+  stroke: #000;
+  stroke-opacity: 0.2;
+}
+
+.polygons {
+  fill: none;
+  stroke: #000;
+}
+
+.polygons :first-child {
+  fill: #f00;
+}
+
+.sites {
+  fill: #000;
+  stroke: #fff;
+}
+
+.sites :first-child {
+  fill: #fff;
+}
+
 
 
 
