@@ -1,9 +1,4 @@
 import React, { Component } from 'react';
-import _ from 'lodash';
-import TreeGraph from './TreeGraph.jsx';
-import Slider from './Slider.jsx';
-import Header from './Header.jsx';
-import * as treeSpecs from './TreeSpecs.jsx';
 
 export default class App extends Component {
     constructor(props) {
@@ -28,27 +23,27 @@ export default class App extends Component {
     }
 
     render() {
-        const specs = _.values(treeSpecs);
-        const treeGraphs = specs.map(spec => (
-            <TreeGraph
-                productionSpec={spec}
-                svgSize={{ treeWidth: 600, commandWidth: 300, height: 750 }}
-                screenSize={{ width: this.state.screenWidth, height: this.state.screenHeight }}
-                key={spec.id}
-            />
-        ));
-
-        const GraphSection = (
-            <Slider>
-                {treeGraphs}
-            </Slider>
-        );
-
         return (
-            <div className="App">
-                <Header title="L System Examples" />
-                { GraphSection }
-            </div>
+            <article id="wrap">
+
+                <div className="header">
+                    <h1 className="header_logo">CHAOS</h1>
+                    <h5 className="header_subline"> Orders in Disorder </h5>
+                </div>
+
+                <article id="lightings">
+                    <section id="one">
+                        <section id="two">
+                            <section id="three">
+                                <section id="four">
+                                    <section id="five" />
+                                </section>
+                            </section>
+                        </section>
+                    </section>
+                </article>
+
+            </article>
         );
     }
 }
