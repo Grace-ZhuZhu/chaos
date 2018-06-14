@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Overview } from './Overview.jsx';
+import descriptions from './visDescriptions';
 
 const HEADER_HEIGHT = 250;
 
@@ -51,7 +52,7 @@ export default class App extends Component {
                 <Overview
                     screenWidth={this.state.screenWidth}
                     screenHeight={this.state.screenHeight}
-                    count={4}
+                    visDescriptions={descriptions}
                 />
             </div>
         );
