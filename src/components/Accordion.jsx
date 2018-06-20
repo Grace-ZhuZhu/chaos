@@ -1,7 +1,7 @@
 /* eslint-disable react/prefer-stateless-function, react/prop-types */
 import React, { Component } from 'react';
 
-class Accordion extends Component {
+export class Accordion extends Component {
     render() {
         const { content } = this.props;
         return (
@@ -15,4 +15,3 @@ class Accordion extends Component {
     }
 }
 
-export default Accordion;

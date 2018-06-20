@@ -2,9 +2,9 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import _ from 'lodash';
-import Plant from './Plant.jsx';
+import { Plant } from './Plant.jsx';
 
-class TreeGraph extends Component {
+export class TreeGraph extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -233,5 +233,3 @@ class TreeGraph extends Component {
         );
     }
 }
-
-export default TreeGraph;

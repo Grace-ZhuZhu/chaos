@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React, { Component } from 'react';
 
-class Slider extends Component {
+export class Slider extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -70,5 +70,3 @@ class Slider extends Component {
         );
     }
 }
-
-export default Slider;

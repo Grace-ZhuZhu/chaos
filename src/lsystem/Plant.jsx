@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { generateCommand, getBranchEnd } from './PlantService.jsx';
 
-class Plant {
+export class Plant {
     constructor(productionSpecs) {
         this.productionSpecs = productionSpecs;
         this.command = null;
@@ -79,5 +79,3 @@ class Plant {
         }
     }
 }
-
-export default Plant;
