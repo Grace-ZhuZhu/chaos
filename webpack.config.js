@@ -25,7 +25,7 @@ const copyWebpackPlugin = new CopyWebpackPlugin([
 
 module.exports = {
     output: {
-        publicPath: 'dist',
+        publicPath: '/',
     },
     module: {
         rules: [
@@ -57,6 +57,7 @@ module.exports = {
         compress: true,
         port: '3001',
         stats: 'errors-only',
+        historyApiFallback: true,
     },
     plugins: [
         htmlPlugin,

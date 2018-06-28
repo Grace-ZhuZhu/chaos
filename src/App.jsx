@@ -1,60 +1,15 @@
-import React, { Component } from 'react';
-import { Overview } from './Overview.jsx';
-import descriptions from './visDescriptions';
+import React from 'react';
+import { Switch, Route } from 'react-router-dom';
+import { Main } from './Main.jsx';
+import { LSystem } from './lsystem/LSystem.jsx';
 
-const HEADER_HEIGHT = 250;
-
-export default class App extends Component {
-    constructor(props) {
-        super(props);
-        this.onResize = this.onResize.bind(this);
-        this.state = {
-            screenWidth: window.innerWidth,
-            screenHeight: window.innerHeight - 120,
-        };
-    }
-
-    componentDidMount() {
-        window.addEventListener('resize', this.onResize, false);
-        this.onResize();
-    }
-
-    onResize() {
-        this.setState({
-            screenWidth: window.innerWidth,
-            screenHeight: window.innerHeight - HEADER_HEIGHT,
-        });
-    }
-
-    render() {
-        return (
-            <div className="flex-container">
-
-                <header className="header-section">
-                    <div className="header-title">
-                        <h1 className="header-logo">CHAOS</h1>
-                        <h5 className="header-subline"> Orders in Disorder </h5>
-                    </div>
-
-                    <div id="lightings">
-                        <section id="one">
-                            <section id="two">
-                                <section id="three">
-                                    <section id="four">
-                                        <section id="five" />
-                                    </section>
-                                </section>
-                            </section>
-                        </section>
-                    </div>
-                </header>
-
-                <Overview
-                    screenWidth={this.state.screenWidth}
-                    screenHeight={this.state.screenHeight}
-                    visDescriptions={descriptions}
-                />
-            </div>
-        );
-    }
+export default function App() {
+    return (
+        <main>
+            <Switch>
+                <Route exact path="/" component={Main} />
+                <Route path="/lsystem" component={LSystem} />
+            </Switch>
+        </main>
+    );
 }

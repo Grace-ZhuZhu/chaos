@@ -326,7 +326,13 @@ to { box-shadow: 0 0 100px 15px #F4F6AD; }
   fill: #fff;
 }
 
+.clickable {
+  cursor: pointer;
+}
 
+a:not(.todo):hover {
+  cursor: pointer;
+}
 
 
 /* App Page */

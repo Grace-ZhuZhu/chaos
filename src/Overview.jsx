@@ -2,6 +2,7 @@
 /* eslint-disable class-methods-use-this, react/prop-types, func-names */
 import React, { Component } from 'react';
 import * as d3 from 'd3';
+import { isTodo } from './MainService.jsx';
 
 const OVERVIEW_WIDTH = 960;
 const ITEM_MIN_AREA = 400 * 400;
@@ -17,10 +18,13 @@ export class Overview extends Component {
         this.sites = null;
         this.centroids = null;
         this.label = null;
-        this.count = this.props.visDescriptions.length;
+        this.visDescriptions = this.props.visDescriptions;
+        this.count = this.visDescriptions.length;
     }
 
     componentDidMount = () => {
+        const overview = this;
+
         const svg = d3.select('svg');
         const width = +svg.attr('width');
         const height = +svg.attr('height');
@@ -42,16 +46,30 @@ export class Overview extends Component {
             .append('path')
             .call(this.drawPolygon);
 
+        this.polygon.each(function (d, i) {
+            this.id = i;
+            this.visDescription = overview.visDescriptions[i];
+        });
+
         this.label = svg.append('g')
             .attr('class', 'labels')
-            .selectAll('text')
+            .selectAll('a')
             .data(this.centroids)
             .enter()
+            .append('a')
+            .classed('todo', (d, i) => isTodo(this.visDescriptions[i].description))
+            .attr('xlink:href', (d, i) => {
+                const vis = this.visDescriptions[i];
+                if (vis.path) {
+                    return `${vis.path}`;
+                }
+                return null;
+            })
             .append('text')
             .attr('x', 0)
             .attr('y', -120)
             .text((d, i) => {
-                const vis = this.props.visDescriptions[i];
+                const vis = this.visDescriptions[i];
                 return vis.title;
             })
             .attr('font-family', 'arial')
@@ -64,7 +82,7 @@ export class Overview extends Component {
             .attr('font-size', '15px')
             .attr('fill', '#434343')
             .text((d, i) => {
-                const vis = this.props.visDescriptions[i];
+                const vis = this.visDescriptions[i];
                 return vis.description;
             });
 
@@ -90,31 +108,27 @@ export class Overview extends Component {
         return Math.round(height);
     }
 
-    handleMouseOver() {
+    handleMouseOver = (d, i, all) => {
+        const current = all[i];
+
         d3.selectAll('path')
             .style('fill', 'black')
             .style('fill-opacity', 0.05);
 
-        d3.select(this)
-            .style('fill', '#f00')
-            .style('fill-opacity', 0.9);
-    }
-
-    handleMouseOut() {
-
-    }
-
-    draw = () => {
-        const diagram = this.voronoi(this.sites);
-        this.polygon = this.polygon.data(diagram.polygons()).call(this.drawPolygon);
-        this.site = this.site.data(this.sites).call(this.drawSite);
+        if (!isTodo(current.visDescription.description)) {
+            d3.select(current)
+                .style('fill', 'red')
+                .style('fill-opacity', 0.9);
+        } else {
+            d3.select(current)
+                .style('fill-opacity', 0.2);
+        }
     }
 
     drawPolygon = (polygon) => {
         polygon
             .attr('d', d => (d ? `M${d.join('L')}Z` : null))
-            .on('mouseover', this.handleMouseOver)
-            .on('mouseout', this.handleMouseOut);
+            .on('mouseover', this.handleMouseOver);
     }
 
     render() {
