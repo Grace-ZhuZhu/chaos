@@ -6,6 +6,7 @@ import { isTodo } from './MainService.jsx';
 
 const OVERVIEW_WIDTH = 960;
 const ITEM_MIN_AREA = 400 * 400;
+const CLIP_PATH_ID_PREFIX = 'clipPath-';
 
 export class Overview extends Component {
     constructor(props) {
@@ -18,6 +19,7 @@ export class Overview extends Component {
         this.sites = null;
         this.centroids = null;
         this.label = null;
+        this.image = null;
         this.visDescriptions = this.props.visDescriptions;
         this.count = this.visDescriptions.length;
     }
@@ -37,6 +39,33 @@ export class Overview extends Component {
 
         this.polygons = this.voronoi.polygons(this.sites);
         this.centroids = this.polygons.map(d => d3.polygonCentroid(d));
+
+        svg.append('defs')
+            .selectAll('clipPath')
+            .data(this.polygons)
+            .enter()
+            .append('clipPath')
+            .attr('id', (d, i) => `${CLIP_PATH_ID_PREFIX}${i}`)
+            .append('path')
+            .attr('d', d => (d ? `M${d.join('L')}Z` : null));
+
+        svg.select('defs')
+            .append('filter')
+            .attr('id', 'blur-filter')
+            .append('feGaussianBlur')
+            .attr('in', 'SourceGraphic')
+            .attr('stdDeviation', '2');
+
+        this.image = svg.append('g')
+            .classed('background-images', true)
+            .selectAll('image')
+            .data(this.visDescriptions)
+            .enter()
+            .append('image')
+            .attr('clip-path', (d, i) => `url(#${CLIP_PATH_ID_PREFIX}${i})`)
+            .attr('height', '100%')
+            .attr('width', '100%')
+            .attr('xlink:href', d => (d.imagePath ? `${d.imagePath}` : null));
 
         this.polygon = svg.append('g')
             .attr('class', 'polygons')
@@ -118,11 +147,14 @@ export class Overview extends Component {
         if (!isTodo(current.visDescription.description)) {
             d3.select(current)
                 .style('fill', 'red')
-                .style('fill-opacity', 0.9);
+                .style('fill-opacity', 0.1 /* 0.9 */);
         } else {
             d3.select(current)
                 .style('fill-opacity', 0.2);
         }
+
+        this.image
+            .classed('hoverEffect', (data, index) => index === i);
     }
 
     drawPolygon = (polygon) => {

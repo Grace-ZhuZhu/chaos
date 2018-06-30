@@ -313,10 +313,6 @@ to { box-shadow: 0 0 100px 15px #F4F6AD; }
   stroke: #000;
 }
 
-.polygons :first-child {
-  fill: #f00;
-}
-
 .sites {
   fill: #000;
   stroke: #fff;
@@ -332,6 +328,10 @@ to { box-shadow: 0 0 100px 15px #F4F6AD; }
 
 a:not(.todo):hover {
   cursor: pointer;
+}
+
+image.hoverEffect {
+  filter: url("#blur-filter");
 }
 
 
