@@ -24,9 +24,6 @@ const copyWebpackPlugin = new CopyWebpackPlugin([
 
 
 module.exports = {
-    output: {
-        publicPath: 'dist',
-    },
     module: {
         rules: [
             {
