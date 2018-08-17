@@ -7,6 +7,7 @@ import { isTodo } from './MainService.jsx';
 const OVERVIEW_WIDTH = 960;
 const ITEM_MIN_AREA = 400 * 400;
 const CLIP_PATH_ID_PREFIX = 'clipPath-';
+const POLYGON_ID_PREFIX = 'polygon-';
 
 export class Overview extends Component {
     constructor(props) {
@@ -56,15 +57,15 @@ export class Overview extends Component {
             .attr('in', 'SourceGraphic')
             .attr('stdDeviation', '2');
 
+        // images have to be append before polygons
         this.image = svg.append('g')
             .classed('background-images', true)
-            .selectAll('image')
+            .selectAll('g')
             .data(this.visDescriptions)
             .enter()
-            .append('image')
+            .append('g')
             .attr('clip-path', (d, i) => `url(#${CLIP_PATH_ID_PREFIX}${i})`)
-            .attr('height', '100%')
-            .attr('width', '100%')
+            .append('image')
             .attr('xlink:href', d => (d.imagePath ? `${d.imagePath}` : null));
 
         this.polygon = svg.append('g')
@@ -76,7 +77,7 @@ export class Overview extends Component {
             .call(this.drawPolygon);
 
         this.polygon.each(function (d, i) {
-            this.id = i;
+            this.id = `${POLYGON_ID_PREFIX}${i}`;
             this.visDescription = overview.visDescriptions[i];
         });
 
@@ -130,6 +131,22 @@ export class Overview extends Component {
 
                 return `translate(${transform.x} ${transform.y})`;
             });
+
+        // Need to wait for polygons to be ready to get their bbox
+        this.setImageTransformations();
+    }
+
+    setImageTransformations = () => {
+        this.image.attr('transform', (d, i) => {
+            if (d.imagePath) {
+                const bbox = d3.select(`#${POLYGON_ID_PREFIX}${i}`).node().getBBox();
+                const scaleX = bbox.width / d.imageWidth;
+                const scaleY = bbox.height / d.imageHeight;
+                const scale = Math.max(scaleX, scaleY);
+                return `translate(${bbox.x},${bbox.y})scale(${scale})`;
+            }
+            return null;
+        });
     }
 
     getHeight = () => {

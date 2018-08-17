@@ -7,7 +7,9 @@
         "title": "L-System",
         "description": "rules for plants growing",
         "path": "/lsystem",
-        "imagePath": "data/img/lsystem.png"
+        "imagePath": "data/img/lsystem.png",
+        "imageWidth": 832,
+        "imageHeight": 1410
     },
     {
         "title": "Hurricane",
