@@ -13,6 +13,7 @@ export class Overview extends Component {
     constructor(props) {
         super(props);
 
+        this.visCard = null;
         this.voronoi = null;
         this.polygon = null;
         this.polygons = null;
@@ -57,22 +58,28 @@ export class Overview extends Component {
             .attr('in', 'SourceGraphic')
             .attr('stdDeviation', '2');
 
-        // images have to be append before polygons
-        this.image = svg.append('g')
-            .classed('background-images', true)
+
+        this.visCard = svg.append('g')
+            .attr('class', 'visCard')
             .selectAll('g')
-            .data(this.visDescriptions)
+            .data(this.polygons)
             .enter()
+            .append('g');
+
+        // images have to be append before polygons
+        this.image = this.visCard.append('g')
+            .classed('background-images', true)
             .append('g')
             .attr('clip-path', (d, i) => `url(#${CLIP_PATH_ID_PREFIX}${i})`)
             .append('image')
-            .attr('xlink:href', d => (d.imagePath ? `${d.imagePath}` : null));
+            .attr('xlink:href', (d, i) => {
+                const vis = this.visDescriptions[i];
+                return vis.imagePath ? `${vis.imagePath}` : null;
+            });
 
-        this.polygon = svg.append('g')
+
+        this.polygon = this.visCard.append('g')
             .attr('class', 'polygons')
-            .selectAll('path')
-            .data(this.polygons)
-            .enter()
             .append('path')
             .call(this.drawPolygon);
 
@@ -81,11 +88,9 @@ export class Overview extends Component {
             this.visDescription = overview.visDescriptions[i];
         });
 
-        this.label = svg.append('g')
+        this.label = this.visCard.append('g')
             .attr('class', 'labels')
-            .selectAll('a')
-            .data(this.centroids)
-            .enter()
+            // .data(this.centroids)
             .append('a')
             .classed('todo', (d, i) => isTodo(this.visDescriptions[i].description))
             .attr('xlink:href', (d, i) => {
@@ -116,8 +121,10 @@ export class Overview extends Component {
                 return vis.description;
             });
 
+        const self = this;
         svg.selectAll('text')
-            .attr('transform', function (centroid) {
+            .attr('transform', function (d, i) {
+                const centroid = self.centroids[i];
                 const bb = this.getBBox();
                 const textCenter = {
                     x: bb.x + (bb.width / 2),
@@ -138,10 +145,11 @@ export class Overview extends Component {
 
     setImageTransformations = () => {
         this.image.attr('transform', (d, i) => {
-            if (d.imagePath) {
+            const vis = this.visDescriptions[i];
+            if (vis.imagePath) {
                 const bbox = d3.select(`#${POLYGON_ID_PREFIX}${i}`).node().getBBox();
-                const scaleX = bbox.width / d.imageWidth;
-                const scaleY = bbox.height / d.imageHeight;
+                const scaleX = bbox.width / vis.imageWidth;
+                const scaleY = bbox.height / vis.imageHeight;
                 const scale = Math.max(scaleX, scaleY);
                 return `translate(${bbox.x},${bbox.y})scale(${scale})`;
             }
@@ -164,7 +172,7 @@ export class Overview extends Component {
         if (!isTodo(current.visDescription.description)) {
             d3.select(current)
                 .style('fill', 'red')
-                .style('fill-opacity', 0.1 /* 0.9 */);
+                .style('fill-opacity', 0.1);
         } else {
             d3.select(current)
                 .style('fill-opacity', 0.2);
