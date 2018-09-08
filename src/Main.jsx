@@ -36,7 +36,7 @@ export class Main extends Component {
                 <Overview
                     screenWidth={this.state.screenWidth}
                     screenHeight={this.state.screenHeight}
-                    visDescriptions={descriptions}
+                    visInfo={descriptions}
                 />
             </div>
         );

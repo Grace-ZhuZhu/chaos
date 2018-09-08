@@ -13,6 +13,7 @@ export class Overview extends Component {
     constructor(props) {
         super(props);
 
+        this.svg;
         this.visCard = null;
         this.voronoi = null;
         this.polygon = null;
@@ -22,16 +23,16 @@ export class Overview extends Component {
         this.centroids = null;
         this.label = null;
         this.image = null;
-        this.visDescriptions = this.props.visDescriptions;
-        this.count = this.visDescriptions.length;
+        this.visInfo = this.props.visInfo;
+        this.count = this.visInfo.length;
     }
 
     componentDidMount = () => {
         const overview = this;
 
-        const svg = d3.select('svg');
-        const width = +svg.attr('width');
-        const height = +svg.attr('height');
+        this.svg = d3.select('svg');
+        const width = +this.svg.attr('width');
+        const height = +this.svg.attr('height');
 
         this.sites = d3.range(this.count)
             .map(() => [Math.random() * width, Math.random() * height]);
@@ -42,16 +43,16 @@ export class Overview extends Component {
         this.polygons = this.voronoi.polygons(this.sites);
         this.centroids = this.polygons.map(d => d3.polygonCentroid(d));
 
-        svg.append('defs')
+        this.svg.append('defs')
             .selectAll('clipPath')
             .data(this.polygons)
             .enter()
             .append('clipPath')
-            .attr('id', (d, i) => `${CLIP_PATH_ID_PREFIX}${i}`)
+            .attr('id', (d, i) => this.getClipPathAt(i))
             .append('path')
             .attr('d', d => (d ? `M${d.join('L')}Z` : null));
 
-        svg.select('defs')
+        this.svg.select('defs')
             .append('filter')
             .attr('id', 'blur-filter')
             .append('feGaussianBlur')
@@ -59,7 +60,7 @@ export class Overview extends Component {
             .attr('stdDeviation', '2');
 
 
-        this.visCard = svg.append('g')
+        this.visCard = this.svg.append('g')
             .attr('class', 'visCard')
             .selectAll('g')
             .data(this.polygons)
@@ -72,11 +73,7 @@ export class Overview extends Component {
             .append('g')
             .attr('clip-path', (d, i) => `url(#${CLIP_PATH_ID_PREFIX}${i})`)
             .append('image')
-            .attr('xlink:href', (d, i) => {
-                const vis = this.visDescriptions[i];
-                return vis.imagePath ? `${vis.imagePath}` : null;
-            });
-
+            .attr('xlink:href', (d, i) => this.getImagePathAt(i));
 
         this.polygon = this.visCard.append('g')
             .attr('class', 'polygons')
@@ -85,28 +82,18 @@ export class Overview extends Component {
 
         this.polygon.each(function (d, i) {
             this.id = `${POLYGON_ID_PREFIX}${i}`;
-            this.visDescription = overview.visDescriptions[i];
+            this.visInfo = overview.visInfo[i];
         });
 
         this.label = this.visCard.append('g')
             .attr('class', 'labels')
-            // .data(this.centroids)
             .append('a')
-            .classed('todo', (d, i) => isTodo(this.visDescriptions[i].description))
-            .attr('xlink:href', (d, i) => {
-                const vis = this.visDescriptions[i];
-                if (vis.path) {
-                    return `${vis.path}`;
-                }
-                return null;
-            })
+            .classed('todo', (d, i) => isTodo(this.getDescriptionAt(i)))
+            .attr('xlink:href', (d, i) => this.getImagePathAt(i))
             .append('text')
             .attr('x', 0)
             .attr('y', -120)
-            .text((d, i) => {
-                const vis = this.visDescriptions[i];
-                return vis.title;
-            })
+            .text((d, i) => this.getTitleAt(i))
             .attr('font-family', 'arial')
             .attr('font-size', '30px')
             .attr('fill', 'black')
@@ -116,13 +103,37 @@ export class Overview extends Component {
             .attr('font-family', 'monospace')
             .attr('font-size', '15px')
             .attr('fill', '#434343')
-            .text((d, i) => {
-                const vis = this.visDescriptions[i];
-                return vis.description;
-            });
+            .text((d, i) => this.getDescriptionAt(i));
 
+        this.setTextTransformations();
+
+        // Need to wait for polygons to be ready to get their bbox
+        this.setImageTransformations();
+    }
+
+    getVisInfoAt = i => this.visInfo[i]
+
+    getClipPathAt = i => `${CLIP_PATH_ID_PREFIX}${i}`
+
+    getImagePathAt = (i) => {
+        const vis = this.getVisInfoAt(i);
+        return vis.imagePath ? `${vis.imagePath}` : null;
+    }
+
+    getDescriptionAt = (i) => {
+        const vis = this.getVisInfoAt(i);
+        return vis.description;
+    }
+
+    getTitleAt = (i) => {
+        const vis = this.getVisInfoAt(i);
+        return vis.title;
+    }
+
+    setTextTransformations = () => {
         const self = this;
-        svg.selectAll('text')
+
+        this.svg.selectAll('text')
             .attr('transform', function (d, i) {
                 const centroid = self.centroids[i];
                 const bb = this.getBBox();
@@ -138,14 +149,12 @@ export class Overview extends Component {
 
                 return `translate(${transform.x} ${transform.y})`;
             });
-
-        // Need to wait for polygons to be ready to get their bbox
-        this.setImageTransformations();
     }
+
 
     setImageTransformations = () => {
         this.image.attr('transform', (d, i) => {
-            const vis = this.visDescriptions[i];
+            const vis = this.visInfo[i];
             if (vis.imagePath) {
                 const bbox = d3.select(`#${POLYGON_ID_PREFIX}${i}`).node().getBBox();
                 const scaleX = bbox.width / vis.imageWidth;
@@ -169,7 +178,7 @@ export class Overview extends Component {
             .style('fill', 'black')
             .style('fill-opacity', 0.05);
 
-        if (!isTodo(current.visDescription.description)) {
+        if (!isTodo(current.visInfo.description)) {
             d3.select(current)
                 .style('fill', 'red')
                 .style('fill-opacity', 0.1);
