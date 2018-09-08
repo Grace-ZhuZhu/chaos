@@ -323,12 +323,36 @@ to { box-shadow: 0 0 100px 15px #F4F6AD; }
   fill: #fff;
 }
 
+.labels text{
+  font-family: arial;
+  font-size: 30px;
+  fill: black;
+  stroke:  white;
+  stroke-opacity:  0.2;
+  stroke-width: 5;
+}
+
+.labels text tspan{
+  font-family: monospace;
+  font-size: 15px;
+  fill: #434343;
+  stroke:  white;
+  stroke-width: 1;
+}
+
 .clickable {
   cursor: pointer;
 }
 
 a:not(.todo):hover {
   cursor: pointer;
+  &text {
+    fill: white;
+  }
+}
+
+a:not(.todo) text:hover {
+  fill: #bdd8d6;
 }
 
 image.hoverEffect {

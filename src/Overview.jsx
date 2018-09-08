@@ -13,7 +13,7 @@ export class Overview extends Component {
     constructor(props) {
         super(props);
 
-        this.svg;
+        this.svg = null;
         this.visCard = null;
         this.voronoi = null;
         this.polygon = null;
@@ -89,20 +89,14 @@ export class Overview extends Component {
             .attr('class', 'labels')
             .append('a')
             .classed('todo', (d, i) => isTodo(this.getDescriptionAt(i)))
-            .attr('xlink:href', (d, i) => this.getImagePathAt(i))
+            .attr('xlink:href', (d, i) => this.getRoutePathAt(i))
             .append('text')
             .attr('x', 0)
             .attr('y', -120)
             .text((d, i) => this.getTitleAt(i))
-            .attr('font-family', 'arial')
-            .attr('font-size', '30px')
-            .attr('fill', 'black')
             .append('tspan')
             .attr('x', 0)
             .attr('y', -100)
-            .attr('font-family', 'monospace')
-            .attr('font-size', '15px')
-            .attr('fill', '#434343')
             .text((d, i) => this.getDescriptionAt(i));
 
         this.setTextTransformations();
@@ -118,6 +112,11 @@ export class Overview extends Component {
     getImagePathAt = (i) => {
         const vis = this.getVisInfoAt(i);
         return vis.imagePath ? `${vis.imagePath}` : null;
+    }
+
+    getRoutePathAt = (i) => {
+        const vis = this.getVisInfoAt(i);
+        return vis.path ? vis.path : null;
     }
 
     getDescriptionAt = (i) => {
