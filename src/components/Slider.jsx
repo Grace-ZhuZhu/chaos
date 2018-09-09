@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 export class Slider extends Component {
     constructor(props) {
@@ -36,6 +37,7 @@ export class Slider extends Component {
 
     render() {
         const { currentSlide, availableSlides } = this.state;
+        const { disablePrev, disableNext } = this.props;
 
         const slides = React.Children.map(this.props.children, (child, index) => {
             if (availableSlides.has(index)) {
@@ -60,8 +62,8 @@ export class Slider extends Component {
             <div className="slider">
                 <div className="slides-container">
                     {slides}
-                    <button className="prev" onClick={this.onClickPrev}>❮</button>
-                    <button className="next" onClick={this.onClickNext}>❯</button>
+                    { !disablePrev && <button className="prev" onClick={this.onClickPrev}>❮</button> }
+                    { !disableNext && <button className="next" onClick={this.onClickNext}>❯</button> }
                 </div>
                 <div className="dot-container">
                     {dots}
@@ -70,3 +72,13 @@ export class Slider extends Component {
         );
     }
 }
+
+Slider.propTypes = {
+    disablePrev: PropTypes.bool,
+    disableNext: PropTypes.bool,
+};
+
+Slider.defaultProps = {
+    disablePrev: false,
+    disableNext: false,
+};

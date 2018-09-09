@@ -39,7 +39,7 @@ export class LSystem extends Component {
         ));
 
         const GraphSection = (
-            <Slider>
+            <Slider disablePrev >
                 {treeGraphs}
             </Slider>
         );
