@@ -7,7 +7,7 @@ export function Header(props) {
             <a href="/">
                 <i className="fa fa-home" />
             </a>
-            <h5>{props.title}</h5>
+            <h3>{props.title}</h3>
         </div>
     );
 }

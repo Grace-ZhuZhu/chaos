@@ -1,8 +1,9 @@
 /* eslint-disable func-names, no-return-assign, react/prop-types */
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import * as d3 from 'd3';
 import _ from 'lodash';
 import { Plant } from './Plant.jsx';
+import lsystemDescription from './lsystemDescription';
 
 export class TreeGraph extends Component {
     constructor(props) {
@@ -161,14 +162,14 @@ export class TreeGraph extends Component {
     }
 
     getCommandText() {
-        const command = this.props.productionSpec;
+        const rule = this.props.productionSpec;
         const commandToString = [
-            'Command:',
-            `initiator: ${command.initiator}`,
+            'Rules:',
+            `initiator: ${rule.initiator}`,
             'production rules:',
-            `${command.productionRules.join(',   ')}`,
-            `number of recursions: ${command.n}`,
-            `branching angle: ${command.delta}`,
+            `${rule.productionRules.join(',   ')}`,
+            `number of recursions: ${rule.n}`,
+            `branching angle: ${rule.delta}`,
 
         ];
         return commandToString.map(text => (
@@ -206,30 +207,35 @@ export class TreeGraph extends Component {
         const commandText = this.getCommandText();
 
         return (
-            <svg
-                className="canvas"
-                width={svgWidth}
-                height={svgHeight}
-                transform={`scale(${scale}) translate(${translateX},${translateY})`}
-            >
-                <g
-                    ref={node => this.node = node}
-                    width={svgSize.treeWidth}
+            <Fragment>
+                <div>
+                    {lsystemDescription.text}
+                </div>
+                <svg
+                    className="canvas"
+                    width={svgWidth}
                     height={svgHeight}
-                />
+                    transform={`scale(${scale}) translate(${translateX},${translateY})`}
+                >
+                    <g
+                        ref={node => this.node = node}
+                        width={svgSize.treeWidth}
+                        height={svgHeight}
+                    />
 
-                <g transform={`translate(${svgSize.treeWidth},0)`}>
-                    <text
-                        x="0"
-                        y="15"
-                        fontFamily="sans-serif"
-                        fontSize="20px"
-                        fill="white"
-                    >
-                        {commandText}
-                    </text>
-                </g>
-            </svg>
+                    <g transform={`translate(${svgSize.treeWidth},0)`}>
+                        <text
+                            x="0"
+                            y="15"
+                            fontFamily="sans-serif"
+                            fontSize="20px"
+                            fill="white"
+                        >
+                            {commandText}
+                        </text>
+                    </g>
+                </svg>
+            </Fragment>
         );
     }
 }

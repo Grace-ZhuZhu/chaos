@@ -46,7 +46,9 @@ export class LSystem extends Component {
 
         return (
             <div className="App">
-                <Header title="L System Examples" />
+                <Header
+                    title="L System Examples"
+                />
                 { GraphSection }
             </div>
         );
