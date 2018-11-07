@@ -1,7 +1,8 @@
 [
     {
         "title": "MandelBrot&Julia Set",
-        "description": "TODO"
+        "path": "/mandelbrot",
+        "description": "The most beautiful mathematical monster"
     },
     {
         "title": "L-System",
