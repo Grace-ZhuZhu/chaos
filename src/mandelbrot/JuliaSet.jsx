@@ -6,7 +6,6 @@ const VIEW_ANGLE = 45;
 const NEAR = 0.1;
 const FAR = 1000;
 
-
 export class JuliaSet extends Component {
     constructor(props) {
         super(props);
@@ -59,10 +58,10 @@ export class JuliaSet extends Component {
             #endif
             
             varying vec2 initial_z;
+            uniform vec2 C;
 
             void main()
             {
-                vec2 C = vec2(0.3, 0.52);
                 vec2 Z = initial_z;
                 const int MAX_ITERATION = 1000;    
                 int iteration = 0;
@@ -86,7 +85,15 @@ export class JuliaSet extends Component {
             }
         `;
 
+        const uniforms = {
+            C: {
+                type: 'v2',
+                value: new THREE.Vector2(0.25, 0.52),
+            },
+        };
+
         const shaderMaterial = new THREE.ShaderMaterial({
+            uniforms,
             vertexShader,
             fragmentShader,
         });
