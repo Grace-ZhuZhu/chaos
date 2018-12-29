@@ -1,100 +1,112 @@
 /* eslint-disable class-methods-use-this */
 import React, { Component } from 'react';
-import * as math from 'mathjs';
-import { docProduct } from '../service/MathService.jsx';
+import * as THREE from 'three';
 
-const MAX_ITERATION = 1000;
-const THRESHOLD_SQUARED = 16;
-const OUTER_COLOR = {
-    r: 255,
-    g: 0,
-    b: 0,
-    a: 255,
-};
+const VIEW_ANGLE = 45;
+const NEAR = 0.1;
+const FAR = 1000;
 
-const TEST_COLOR = {
-    r: 0,
-    g: 255,
-    b: 0,
-    a: 255,
-};
 
 export class JuliaSet extends Component {
     constructor(props) {
         super(props);
 
-        this.width = this.props.screenWidth / 2;
-        this.height = this.props.screenHeight;
+        const { screenWidth, screenHeight } = this.props;
+        this.width = screenWidth / 2;
+        this.height = screenHeight;
 
         this.centerX = this.width / 2;
         this.centerY = this.height / 2;
     }
 
     componentDidMount() {
-        const { canvas } = this.refs;
-        const ctx = canvas.getContext('2d');
-        ctx.fillRect(0, 0, this.width, this.height);
+        const { container } = this.refs;
 
-        const imgData = ctx.createImageData(this.width, this.height);
+        const renderer = new THREE.WebGLRenderer();
+        const camera = new THREE.PerspectiveCamera(
+            VIEW_ANGLE,
+            this.width / this.height,
+            NEAR,
+            FAR,
+        );
+        const scene = new THREE.Scene();
 
-        for (let i = 0; i < this.width; i += 1) {
-            for (let j = 0; j < this.height; j += 1) {
-                const pixel = {
-                    x: i,
-                    y: j,
-                };
-                const point = this.pixelToPoint(pixel);
-                const rgba = this.getColor(point);
-                this.setPixel(imgData, pixel, rgba);
+        camera.position.set(0, 0, FAR);
+
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        renderer.setSize(this.width, this.height);
+
+        container.append(renderer.domElement);
+
+        const vertexShader = `
+            #ifdef GL_ES
+            precision highp float;
+            #endif
+
+            varying vec2 initial_z;
+
+            void main()
+            {
+                initial_z = position.xy;
+                gl_Position = vec4(position,1.0);
             }
-        }
+        `;
 
-        ctx.putImageData(imgData, 0, 0);
-    }
+        const fragmentShader = `
+            #ifdef GL_ES
+            precision highp float;
+            #endif
+            
+            varying vec2 initial_z;
 
-    setPixel(imgData, pixel, rgba) {
-        const index = (pixel.x + (pixel.y * imgData.width)) * 4;
-        imgData.data[index + 0] = rgba.r;
-        imgData.data[index + 1] = rgba.g;
-        imgData.data[index + 2] = rgba.b;
-        imgData.data[index + 3] = rgba.a;
-    }
+            void main()
+            {
+                vec2 C = vec2(0.3, 0.52);
+                vec2 Z = initial_z;
+                const int MAX_ITERATION = 1000;    
+                int iteration = 0;
+                for (int i = 0; i < MAX_ITERATION; i += 1) {
+                    if (length(Z) > max(length(C), float(2))) {
+                        break;
+                    }
+        
+                    vec2 zSquared = vec2(Z.x * Z.x - Z.y * Z.y, 2.0 * Z.x * Z.y);
+        
+                    Z = zSquared + C;
 
-    getColor = (point) => {
-        let z = math.complex(point.x, point.y);
-        const { c } = this.props;
-
-        let n = 0;
-        for (n = 0; n < MAX_ITERATION; n += 1) {
-            if (z.abs() > Math.max(c.abs(), 2)) {
-                break;
+                    iteration = i;
+                }
+        
+                if (iteration == MAX_ITERATION) {
+                    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+                }
+        
+                gl_FragColor = vec4(float(iteration) / float(MAX_ITERATION), 0.0, 0.0, 1.0);                
             }
+        `;
 
-            const ZSquared = math.multiply(z, z);
+        const shaderMaterial = new THREE.ShaderMaterial({
+            vertexShader,
+            fragmentShader,
+        });
 
-            z = math.add(ZSquared, c);
-        }
+        const sphere = new THREE.Mesh(
+            new THREE.PlaneGeometry(this.width, this.height),
+            shaderMaterial,
+        );
 
-        if (n === MAX_ITERATION) {
-            return OUTER_COLOR;
-        }
+        scene.add(sphere);
+        scene.add(camera);
 
-        return TEST_COLOR;
-    }
-
-    pixelToPoint = (pixel) => {
-        const minRadius = Math.min(this.width / 2, this.height / 2);
-        return {
-            x: (pixel.x - this.centerX) / minRadius,
-            y: (pixel.y - this.centerY) / minRadius,
-        };
+        renderer.render(scene, camera);
     }
 
     render() {
         return (
-            <canvas
+            <div
                 id="juliaSet"
-                ref="canvas"
+                ref="container"
                 width={this.width}
                 height={this.height}
                 style={{ border: '1px solid #000000' }}
