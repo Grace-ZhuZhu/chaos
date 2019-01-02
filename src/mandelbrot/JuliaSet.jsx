@@ -1,5 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import React, { Component } from 'react';
+import * as d3 from 'd3';
 import * as THREE from 'three';
 
 const VIEW_ANGLE = 45;
@@ -59,6 +60,7 @@ export class JuliaSet extends Component {
             
             varying vec2 initial_z;
             uniform vec2 C;
+            uniform sampler2D gradient;
 
             void main()
             {
@@ -77,36 +79,43 @@ export class JuliaSet extends Component {
                     iteration = i;
                 }
         
-                if (iteration == MAX_ITERATION) {
-                    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-                }
-        
-                gl_FragColor = vec4(float(iteration) / float(MAX_ITERATION), 0.0, 0.0, 1.0);                
+                vec4 outside_color = vec4(.12, .76, .66, 1.0);
+                vec4 inside_color = vec4(.98, .3, .4, 1.0);
+                float rate = float(iteration) / float(MAX_ITERATION);
+
+                gl_FragColor = outside_color + (inside_color - outside_color) * rate;
             }
         `;
 
-        const uniforms = {
-            C: {
-                type: 'v2',
-                value: new THREE.Vector2(0.25, 0.52),
-            },
-        };
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load('/data/img/juliaGradient.jpeg', (tex) => {
+            const uniforms = {
+                C: {
+                    type: 'v2',
+                    value: new THREE.Vector2(0.25, 0.52),
+                },
+                gradient: {
+                    type: 't',
+                    value: tex,
+                },
+            };
 
-        const shaderMaterial = new THREE.ShaderMaterial({
-            uniforms,
-            vertexShader,
-            fragmentShader,
+            const shaderMaterial = new THREE.ShaderMaterial({
+                uniforms,
+                vertexShader,
+                fragmentShader,
+            });
+
+            const sphere = new THREE.Mesh(
+                new THREE.PlaneGeometry(this.width, this.height),
+                shaderMaterial,
+            );
+
+            scene.add(sphere);
+            scene.add(camera);
+
+            renderer.render(scene, camera);
         });
-
-        const sphere = new THREE.Mesh(
-            new THREE.PlaneGeometry(this.width, this.height),
-            shaderMaterial,
-        );
-
-        scene.add(sphere);
-        scene.add(camera);
-
-        renderer.render(scene, camera);
     }
 
     render() {
