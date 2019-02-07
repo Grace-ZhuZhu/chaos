@@ -17,39 +17,99 @@ export class JuliaSet extends Component {
 
         this.centerX = this.width / 2;
         this.centerY = this.height / 2;
+
+        this.scene = new THREE.Scene();
+        this.renderer = new THREE.WebGLRenderer();
+        this.camera = null;
+        this.canvasPlane = null;
+
+        this.uniformValues = {
+            offset: new THREE.Vector2(0, 0),
+            C: new THREE.Vector2(0.25, 0.52),
+            zoom: 1,
+            translate: new THREE.Vector2(0, 0),
+        };
     }
 
     componentDidMount() {
-        const { container } = this.refs;
+        this.setupRenderer();
+        this.setupCamera();
+        this.setupScene();
+        this.renderer.render(this.scene, this.camera);
+    }
 
-        const renderer = new THREE.WebGLRenderer();
-        const camera = new THREE.PerspectiveCamera(
+    setupRenderer = () => {
+        const { container } = this.refs;
+        this.renderer.setSize(this.width, this.height);
+        container.append(this.renderer.domElement);
+
+        this.setupDragAndZoomHandler();
+    }
+
+    setupCamera = () => {
+        this.camera = new THREE.PerspectiveCamera(
             VIEW_ANGLE,
             this.width / this.height,
             NEAR,
             FAR,
         );
-        const scene = new THREE.Scene();
+        this.camera.position.set(0, 0, FAR);
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    }
 
-        camera.position.set(0, 0, FAR);
+    setupScene = () => {
+        const { vertexShader, fragmentShader } = this.getShaders();
 
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        const uniforms = {
+            C: {
+                type: 'v2',
+                value: this.uniformValues.C,
+            },
+            zoom: {
+                type: 'f',
+                value: this.uniformValues.zoom,
+            },
+            offset: {
+                type: 'v2',
+                value: this.uniformValues.offset,
+            },
+            translate: {
+                type: 'v2',
+                value: this.uniformValues.translate,
+            },
+        };
 
-        renderer.setSize(this.width, this.height);
+        const shaderMaterial = new THREE.ShaderMaterial({
+            uniforms,
+            vertexShader,
+            fragmentShader,
+        });
 
-        container.append(renderer.domElement);
+        this.canvasPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(this.width, this.height),
+            shaderMaterial,
+        );
 
+        this.scene.add(this.canvasPlane);
+        this.scene.add(this.camera);
+    }
+
+    getShaders() {
         const vertexShader = `
             #ifdef GL_ES
             precision highp float;
             #endif
 
             varying vec2 initial_z;
+            uniform float zoom;
+            uniform vec2 offset;
+            uniform vec2 translate;
 
             void main()
             {
-                initial_z = position.xy;
-                gl_Position = vec4(position,1.0);
+                float scale = 1.0/zoom;
+                initial_z = (position.xy - translate) * scale;
+                gl_Position = vec4(position, 1.0);
             }
         `;
 
@@ -60,7 +120,6 @@ export class JuliaSet extends Component {
             
             varying vec2 initial_z;
             uniform vec2 C;
-            uniform sampler2D gradient;
 
             void main()
             {
@@ -86,36 +145,66 @@ export class JuliaSet extends Component {
                 gl_FragColor = outside_color + (inside_color - outside_color) * rate;
             }
         `;
+        return {
+            vertexShader,
+            fragmentShader,
+        };
+    }
 
-        const textureLoader = new THREE.TextureLoader();
-        textureLoader.load('/data/img/juliaGradient.jpeg', (tex) => {
-            const uniforms = {
-                C: {
-                    type: 'v2',
-                    value: new THREE.Vector2(0.25, 0.52),
-                },
-                gradient: {
-                    type: 't',
-                    value: tex,
-                },
-            };
+    setupDragAndZoomHandler() {
+        const drag = d3.drag()
+            .on('drag', () => this.dragged());
 
-            const shaderMaterial = new THREE.ShaderMaterial({
-                uniforms,
-                vertexShader,
-                fragmentShader,
-            });
+        const zoom = d3.zoom()
+            .translateExtent([
+                [-this.width * 2, -this.height * 2],
+                [this.width * 2, this.height * 2],
+            ])
+            .on('zoom', () => this.zoomed());
 
-            const sphere = new THREE.Mesh(
-                new THREE.PlaneGeometry(this.width, this.height),
-                shaderMaterial,
-            );
+        const view = d3.select(this.renderer.domElement);
+        view.call(drag);
+        view.call(zoom);
+    }
 
-            scene.add(sphere);
-            scene.add(camera);
+    dragged() {
+        const { dx, dy } = d3.event;
+        const { value: lastOffset } = this.uniformValues.offset;
+        const moved = new THREE.Vector2(-dx / this.width, dy / this.height);
+        this.canvasPlane.material.uniforms.offset.value = lastOffset.add(moved);
 
-            renderer.render(scene, camera);
-        });
+        this.renderScene();
+    }
+
+    zoomed() {
+        const { transform } = d3.event;
+        const { k } = transform; // The whole scale
+
+        const cursor = d3.mouse(d3.select(this.renderer.domElement).node());
+
+        const cursor_coord = new THREE.Vector2(
+            (cursor[0] - this.centerX) / (this.width / 2),
+            (cursor[1] - this.centerY) / (this.height / 2),
+        );
+
+        const scaled_cursor_coord = new THREE.Vector2(
+            cursor_coord.x * k,
+            cursor_coord.y * k,
+        );
+
+        this.canvasPlane.material.uniforms.zoom.value = k;
+        this.canvasPlane.material.uniforms.translate.value = new THREE.Vector2(
+            cursor_coord.x - scaled_cursor_coord.x,
+            scaled_cursor_coord.y - cursor_coord.y,
+        );
+
+
+        this.renderScene();
+    }
+
+    renderScene() {
+        this.canvasPlane.material.needsUpdate = true;
+        this.renderer.render(this.scene, this.camera);
     }
 
     render() {
